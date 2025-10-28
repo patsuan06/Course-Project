@@ -1,4 +1,4 @@
-package com.trinity.crourierapp;
+package com.trinity.courierapp;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
