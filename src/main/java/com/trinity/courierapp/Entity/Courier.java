@@ -5,13 +5,17 @@ import jakarta.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
+@Setter
+@Getter
 @Entity
-@Table(name = "courier")
+@Table(name = "courier_profiles")
 public class Courier {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "courier_id_gen")
@@ -19,17 +23,12 @@ public class Courier {
     @Column(name = "courier_id", nullable = false)
     private Integer id;
 
-    @Column(name = "full_name", nullable = false, length = 60)
-    private String fullName;
-
-    @Column(name = "phone_number", nullable = false, length = Integer.MAX_VALUE)
-    private String phoneNumber;
-
     @OneToMany(mappedBy = "courier")
     private Set<Order> orders = new LinkedHashSet<>();
 
-    @Column(name = "password", nullable = false, length = 60)
-    private String password;
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", unique = true)
+    private User courierUser;
 
     @Column(name = "courier_gps", columnDefinition = "geography(Point,4326)")
     private Point courierGps;
@@ -43,28 +42,12 @@ public class Courier {
     @Column(name = "courier_status",nullable = false)
     private CourierStatusEnum courierStatus;
 
-    public VehicleTypeEnum getVehicleType() {
-        return vehicleType;
-    }
+    public Courier() {}
 
-    public void setVehicleType(VehicleTypeEnum vehicleType) {
-        this.vehicleType = vehicleType;
-    }
-
-    public CourierStatusEnum getCourierStatus() {
-        return courierStatus;
-    }
-
-    public void setCourierStatus(CourierStatusEnum courierStatus) {
-        this.courierStatus = courierStatus;
-    }
-
-    public Point getCourierGps() {
-        return courierGps;
-    }
-
-    public void setCourierGps(Point courierGps) {
+    public Courier(Point courierGps, VehicleTypeEnum vehicleType, CourierStatusEnum courierStatus) {
         this.courierGps = courierGps;
+        this.vehicleType = vehicleType;
+        this.courierStatus = courierStatus;
     }
 
     public double getLatitude() {
@@ -79,43 +62,4 @@ public class Courier {
         this.courierGps = new GeometryFactory().createPoint(new Coordinate(longitude, latitude));
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public Set<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(Set<Order> orders) {
-        this.orders = orders;
-    }
 }

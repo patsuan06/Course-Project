@@ -1,6 +1,8 @@
 package com.trinity.courierapp.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Coordinate;
@@ -8,7 +10,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 
 import java.math.BigDecimal;
 
-
+@Getter
+@Setter
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -23,6 +26,7 @@ public class Order {
 
     @Column(name = "price", nullable = false, precision = 6)
     private BigDecimal price;
+
     @Column(name = "recipient_phone_number", nullable = false, length = Integer.MAX_VALUE)
     private String recipientPhoneNumber;
 
@@ -31,8 +35,8 @@ public class Order {
     private Courier courier;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "src_gps", columnDefinition = "geography(Point,4326)", nullable = false)
     private Point srcGps;
@@ -57,53 +61,20 @@ public class Order {
     @Column(name = "payment_method", nullable = false)
     private PaymentMethodEnum paymentMethod;
 
-    public VehicleTypeEnum getVehicleType() {
-        return vehicleType;
-    }
+    public Order() {}
 
-    public void setVehicleType(VehicleTypeEnum vehicleType) {
-        this.vehicleType = vehicleType;
-    }
-
-
-    public OrderTypeEnum getOrderType() {
-        return orderType;
-    }
-
-    public void setOrderType(OrderTypeEnum orderType) {
-        this.orderType = orderType;
-    }
-
-    public OrderStatusEnum getOrderStatus() {
-        return orderStatus;
-    }
-
-    public void setOrderStatus(OrderStatusEnum orderStatus) {
-        this.orderStatus = orderStatus;
-    }
-
-    public PaymentMethodEnum getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(PaymentMethodEnum paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public Point getDestGps() {
-        return destGps;
-    }
-
-    public void setDestGps(Point destGps) {
-        this.destGps = destGps;
-    }
-
-    public Point getSrcGps() {
-        return srcGps;
-    }
-
-    public void setSrcGps(Point srcGps) {
+    public Order(Point srcGps, Point destGps, OrderTypeEnum orderType, OrderStatusEnum orderStatus, Courier courier, User user, PaymentMethodEnum paymentMethod,String recipientFullName, BigDecimal price, String recipientPhoneNumber) {
         this.srcGps = srcGps;
+        this.destGps = destGps;
+        this.orderType = orderType;
+        this.orderStatus = orderStatus;
+        this.courier = courier;
+        this.user = user;
+        this.paymentMethod = paymentMethod;
+        this.price = price;
+        this.recipientFullName = recipientFullName;
+        this.recipientPhoneNumber = recipientPhoneNumber;
+
     }
 
     public double getSrcLatitude() {
@@ -130,51 +101,4 @@ public class Order {
         this.srcGps = new GeometryFactory().createPoint(new Coordinate(longitude, latitude));
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getRecipientFullName() {
-        return recipientFullName;
-    }
-
-    public void setRecipientFullName(String recipientFullName) {
-        this.recipientFullName = recipientFullName;
-    }
-
-    public String getRecipientPhoneNumber() {
-        return recipientPhoneNumber;
-    }
-
-    public void setRecipientPhoneNumber(String recipientPhoneNumber) {
-        this.recipientPhoneNumber = recipientPhoneNumber;
-    }
-
-    public Courier getCourier() {
-        return courier;
-    }
-
-    public void setCourier(Courier courier) {
-        this.courier = courier;
-    }
-
-    public Client getClient() {
-        return client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
 }
