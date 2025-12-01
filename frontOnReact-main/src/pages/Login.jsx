@@ -17,7 +17,7 @@ function Login() {
         setLoading(true);
         try {
             // TODO: заменить на реальный вызов API
-            const res = await fetch("/api/login", { method: "POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ username, password }) });
+            const res = await fetch("/api/auth/login", { method: "POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ email, password }) });
             if (!res.ok) throw new Error("Неверные данные");
             await new Promise((r) => setTimeout(r, 800)); // заглушка
             console.log("Успешный вход:", username);

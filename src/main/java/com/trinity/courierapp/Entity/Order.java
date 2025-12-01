@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -45,20 +47,24 @@ public class Order {
     private Point destGps;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vehicle_type", nullable = false)
+    @Column(name = "vehicle_type", columnDefinition = "vehicle_type_enum", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private VehicleTypeEnum vehicleType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "order_type", nullable = false)
+    @Column(name = "order_type", columnDefinition = "order_type_enum", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private OrderTypeEnum orderType;
 
     @Enumerated(EnumType.STRING)
     @ColumnDefault("SEARCHING_FOR_COURIERS")
-    @Column(name = "order_status", nullable = false)
+    @Column(name = "order_status", columnDefinition = "order_status_enum", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private OrderStatusEnum orderStatus;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false)
+    @Column(name = "payment_method", columnDefinition = "payment_method_enum", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private PaymentMethodEnum paymentMethod;
 
     public Order() {}

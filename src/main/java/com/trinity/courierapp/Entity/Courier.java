@@ -8,6 +8,8 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -23,7 +25,7 @@ public class Courier {
     @Column(name = "courier_id", nullable = false)
     private Integer id;
 
-    @OneToMany(mappedBy = "courier")
+    @OneToMany(mappedBy = "courier", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Order> orders = new LinkedHashSet<>();
 
     @OneToOne
@@ -34,20 +36,26 @@ public class Courier {
     private Point courierGps;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vehicle_type", nullable = false)
+    @Column(name = "vehicle_type", columnDefinition = "vehicle_type_enum", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private VehicleTypeEnum vehicleType;
 
     @Enumerated(EnumType.STRING)
     @ColumnDefault("FREE")
-    @Column(name = "courier_status",nullable = false)
+    @Column(name = "courier_status", columnDefinition = "courier_status_enum", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private CourierStatusEnum courierStatus;
+
+    @Column(name = "vehicle_number")
+    private String vehicleNumber;
 
     public Courier() {}
 
-    public Courier(Point courierGps, VehicleTypeEnum vehicleType, CourierStatusEnum courierStatus) {
+    public Courier(Point courierGps, VehicleTypeEnum vehicleType, CourierStatusEnum courierStatus, String vehicleNumber) {
         this.courierGps = courierGps;
         this.vehicleType = vehicleType;
         this.courierStatus = courierStatus;
+        this.vehicleNumber = vehicleNumber;
     }
 
     public double getLatitude() {

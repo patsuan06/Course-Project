@@ -3,7 +3,9 @@ package com.trinity.courierapp.Entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.usertype.UserType;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -38,9 +40,9 @@ public class User {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "user_type", nullable = false)
+    @Column(name = "user_type", columnDefinition = "user_type_enum",nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private UserTypeEnum userType;
-
 
     public User() {}
 
