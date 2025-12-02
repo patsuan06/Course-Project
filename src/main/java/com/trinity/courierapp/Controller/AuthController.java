@@ -20,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/auth")
 public class AuthController {
 
@@ -68,7 +69,8 @@ public class AuthController {
         }
         final User newUser = new User(dto.getFullName(), dto.getPhoneNumber(), dto.getPassword(), dto.getEmail(), dto.getUserType());
         userRepository.save(newUser);
-        final Courier courier = new Courier(dto.getVehicleNumber(), dto.getVehicleType());
+        final Courier courier = new Courier(dto.getCourierGps(),dto.getVehicleType(), dto.getCourierStatus(), dto.getVehicleNumber());
+        courier.setCourierUser(newUser);
         courierRepository.save(courier);
         return "Registration Successful";
     }

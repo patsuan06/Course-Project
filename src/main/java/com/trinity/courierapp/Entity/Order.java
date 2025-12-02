@@ -11,6 +11,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -67,9 +68,12 @@ public class Order {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private PaymentMethodEnum paymentMethod;
 
+    @Column(name = "order_date", nullable = false)
+    private LocalDate orderDate;
+
     public Order() {}
 
-    public Order(Point srcGps, Point destGps, OrderTypeEnum orderType, OrderStatusEnum orderStatus, Courier courier, User user, PaymentMethodEnum paymentMethod,String recipientFullName, BigDecimal price, String recipientPhoneNumber) {
+    public Order(Point srcGps, Point destGps, OrderTypeEnum orderType, OrderStatusEnum orderStatus, Courier courier, User user, PaymentMethodEnum paymentMethod,String recipientFullName, BigDecimal price, String recipientPhoneNumber, LocalDate orderDate) {
         this.srcGps = srcGps;
         this.destGps = destGps;
         this.orderType = orderType;
@@ -80,7 +84,7 @@ public class Order {
         this.price = price;
         this.recipientFullName = recipientFullName;
         this.recipientPhoneNumber = recipientPhoneNumber;
-
+        this.orderDate = orderDate;
     }
 
     public double getSrcLatitude() {
