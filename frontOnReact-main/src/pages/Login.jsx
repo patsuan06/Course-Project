@@ -2,6 +2,7 @@
 import { useState } from "react";
 
 function Login() {
+    const [email, setEmail] =useState("")
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -17,7 +18,7 @@ function Login() {
         setLoading(true);
         try {
             // TODO: заменить на реальный вызов API
-            const res = await fetch("/api/auth/login", { method: "POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ email, password }) });
+            const res = await fetch("http://localhost:8080/api/auth/login", { method: "GET", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ email, password }) });
             if (!res.ok) throw new Error("Неверные данные");
             await new Promise((r) => setTimeout(r, 800)); // заглушка
             console.log("Успешный вход:", username);

@@ -15,8 +15,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +22,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -36,8 +37,8 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
-    @GetMapping("/login")
-    public String authenticateUser(@Valid @RequestBody AuthRequestDto authRequestDto, BindingResult bindingResult) {
+    @PostMapping("/login")
+    public String authenticateUser(@Valid @RequestBody AuthRequestDto authRequestDto) { /// bindingResult for errors (if I return request entity)
         Authentication authentication = authenticationManager.authenticate(
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
                         authRequestDto.getEmail(),
@@ -46,9 +47,9 @@ public class AuthController {
         );
 
 //        SecurityContextHolder.getContext().setAuthentication(authentication);
-
         final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return jwtUtils.generateToken(Integer.valueOf(userDetails.getUsername()));
+        return jwtUtils.generateToken(userDetails.getUsername());
+
     }
 
     @PostMapping("/client_signup")
@@ -56,7 +57,7 @@ public class AuthController {
         if (userRepository.existsByEmail(dto.getEmail())){
             return "Email Already Exists";
         }
-        final User newUser = new User(dto.getFullName(), dto.getPhoneNumber(), dto.getPassword(), dto.getEmail(), dto.getUserType());
+        final User newUser = new User(dto.getFullName(), dto.getPhoneNumber(), passwordEncoder.encode(dto.getPassword()), dto.getEmail(), dto.getUserType());
         userRepository.save(newUser);
         return "Registration Successful";
     }

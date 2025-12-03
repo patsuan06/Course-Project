@@ -18,7 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     @Autowired
-    CustomUserDetailsService userDetailsService;
+    CustomUserDetailsService customUserDetailsService;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
@@ -51,7 +51,7 @@ public class WebSecurityConfig {
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(a ->
-                        a.requestMatchers("/api/auth/**").permitAll()
+                        a.requestMatchers("/api/auth/login", "/api/auth/client_signup", "/api/auth/courier_signup").permitAll()
                                 .anyRequest().authenticated()
                 );
 

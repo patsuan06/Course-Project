@@ -31,9 +31,9 @@ public class JwtUtils {
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(Integer id) {
+    public String generateToken(String email) {
         return Jwts.builder()
-                .subject(String.valueOf(id))
+                .subject(email)
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime()+jwtExpirationMs))
                 .signWith(key)
