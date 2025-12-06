@@ -17,11 +17,4 @@ public class OrderService {
     @Autowired
     private CourierRepository courierRepository;
 
-    public OrderCreationResponseDto createOrder(OrderCreationRequestDto orderCreationRequestDto){
-
-
-
-    }
-
-
 }

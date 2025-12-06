@@ -10,5 +10,5 @@ public class CourierService {
     @Autowired
     private CourierRepository courierRepository;
 
-    public
+
 }
