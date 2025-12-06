@@ -32,7 +32,7 @@ public class PaymentService {
         PaymentIntentCreateParams params =
                 PaymentIntentCreateParams.builder()
                         .setAmount(amountInCents)
-                        .setCurrency("usd")
+                        .setCurrency("kgs")
                         .build();
 
         PaymentIntent intent = PaymentIntent.create(params);
