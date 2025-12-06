@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/user")
 public class UserController {
 
@@ -22,6 +22,11 @@ public class UserController {
     public UserController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
+/*
+    @Autowired
+    private UserRepository userRepository;
+*/
 
     @GetMapping("/get_info")
     public UserInfoDto getUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
