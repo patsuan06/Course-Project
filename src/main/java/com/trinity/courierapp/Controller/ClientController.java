@@ -3,9 +3,11 @@ package com.trinity.courierapp.Controller;
 import com.trinity.courierapp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("Client")
 @CrossOrigin(origins = "http://localhost:3000")
 public class ClientController {
 
@@ -15,8 +17,5 @@ public class ClientController {
     public ClientController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
-
-
 
 }
