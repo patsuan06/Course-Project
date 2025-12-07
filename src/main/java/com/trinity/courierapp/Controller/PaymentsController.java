@@ -1,10 +1,9 @@
 package com.trinity.courierapp.Controller;
 
 import com.stripe.exception.StripeException;
+import com.trinity.courierapp.DTO.PaymentIntentResponse;
 import com.trinity.courierapp.DTO.SavedMethodsDto;
-import com.trinity.courierapp.Entity.PaymentDetail;
 import com.trinity.courierapp.Entity.User;
-import com.trinity.courierapp.Repository.PaymentDetailRepository;
 import com.trinity.courierapp.Repository.UserRepository;
 import com.trinity.courierapp.Service.PaymentService;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +31,13 @@ public class PaymentsController {
 
 
     @PostMapping("/intent")
-    public ResponseEntity<?> createIntent(@RequestParam Long amount) {
+    public ResponseEntity<?> createIntent(@RequestParam Long amount, @RequestParam String paymentMethodId) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String email = auth.getName();
-            String clientSecret = paymentService.createPaymentIntent(amount, email);
-            return ResponseEntity.ok(clientSecret);
+            PaymentIntentResponse response = paymentService.createIntentAndPayWithSavedMethod(amount, paymentMethodId);
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error creating payment");
+            return ResponseEntity.status(500).body("Error creating payment"+e.getMessage());
         }
     }
 
@@ -53,7 +51,6 @@ public class PaymentsController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error saving payment method");
         }
-
     }
 
     @GetMapping("/methods") /// just send me the jwt token in the headers that's all, nothing in the body
@@ -62,4 +59,24 @@ public class PaymentsController {
         User user = userRepository.findByEmail(email);
         return paymentService.getSavedMethods(user);
     }
+
+
 }
+
+
+
+
+
+
+//@PostMapping("/intent")
+//public ResponseEntity<?> createIntent(@RequestParam Long amount) {
+//    try {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        String email = auth.getName();
+//        String clientSecret = paymentService.createIntentAndPayWithSavedMethod(amount, email);
+//
+//        return ResponseEntity.ok(clientSecret);
+//    } catch (Exception e) {
+//        return ResponseEntity.status(500).body("Error creating payment");
+//    }
+//}

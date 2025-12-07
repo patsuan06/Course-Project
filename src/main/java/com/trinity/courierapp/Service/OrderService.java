@@ -1,7 +1,6 @@
 package com.trinity.courierapp.Service;
 
-import com.trinity.courierapp.DTO.OrderCreationRequestDto;
-import com.trinity.courierapp.DTO.OrderCreationResponseDto;
+import com.trinity.courierapp.DTO.OrderInitRequestDto;
 import com.trinity.courierapp.Entity.Order;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Repository.OrderRepository;
@@ -16,5 +15,9 @@ public class OrderService {
 
     @Autowired
     private CourierRepository courierRepository;
+
+    public Order createOrder(OrderInitRequestDto orderInitRequestDto) {}
+
+
 
 }

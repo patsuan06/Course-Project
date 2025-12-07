@@ -7,17 +7,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class OrderCreationRequestDto {
+public class OrderInitRequestDto {
 
     private String recipientFullName;
 
     private String recipientPhoneNumber;
 
-    private String addressString;
+    private String srcAddress;
+
+    private String destAddress;
 
     private OrderStatusEnum orderStatus;
-
-    private String email;
 
     private VehicleTypeEnum vehicleType;
 

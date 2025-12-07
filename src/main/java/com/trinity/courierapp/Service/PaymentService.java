@@ -27,17 +27,23 @@ public class PaymentService {
         this.paymentDetailRepository = paymentDetailRepository;
     }
 
-    public String createPaymentIntent(Long amountInCents, String userId) throws StripeException {
-
+    public String createIntentAndPayWithSavedMethod(Long amount, String paymentMethodId) throws StripeException {
+        Long amountInCents = amount * 100;
         PaymentIntentCreateParams params =
                 PaymentIntentCreateParams.builder()
                         .setAmount(amountInCents)
                         .setCurrency("kgs")
+                        .setPaymentMethod(paymentMethodId)
+                        .setConfirm(true)
+                        .setOffSession(true)
                         .build();
-
         PaymentIntent intent = PaymentIntent.create(params);
-
-        return intent.getClientSecret();
+        return intent.getStatus();
+//        following is for getting the stripe customer payment history
+//        PaymentIntent intent = PaymentIntent.retrieve(intentId);
+//        System.out.println(intent.getAmount());
+//        System.out.println(intent.getStatus());
+//        System.out.println(intent.getPaymentMethod());
     }
 
 
