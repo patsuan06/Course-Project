@@ -79,6 +79,7 @@ public class GoogleMapsService {
         }
     }
 
+
     private Map<String, Object> doGetDirections(double startLat, double startLng, double endLat, double endLng) {
         String url = String.format(
                 "https://maps.googleapis.com/maps/api/directions/json?origin=%f,%f&destination=%f,%f&key=%s",

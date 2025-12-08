@@ -37,9 +37,14 @@ public class OrderService {
         double boundary = 18;
         double km = commonUtils.findDistanceKm(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
 
-        if (km < boundary) {
-            currentOrderType = OrderTypeEnum.LOCAL;
+        if (srcGeocode.region() = "Bishkek" ||  "Osh City") {
+
         }
+//        if (km < boundary) {
+//            currentOrderType = OrderTypeEnum.LOCAL;
+//        }
+
+
 
 
         return new CalcResult(price, currentOrderType);
