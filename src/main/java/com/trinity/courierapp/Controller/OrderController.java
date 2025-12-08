@@ -1,6 +1,7 @@
 package com.trinity.courierapp.Controller;
 
 import com.trinity.courierapp.DTO.OrderInitRequestDto;
+import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.Entity.Order;
 import com.trinity.courierapp.Entity.User;
 import com.trinity.courierapp.Repository.OrderRepository;
@@ -33,9 +34,10 @@ public class OrderController {
     }
 
     @PostMapping("/initialize")
-    public ResponseEntity<?> initOrder(OrderInitRequestDto dto, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<OrderInitResponseDto> initOrder(OrderInitRequestDto dto, @AuthenticationPrincipal UserDetails userDetails) {
         String email = userDetails.getUsername();
         User user = userRepository.findByEmail(email);
+
 
 
 

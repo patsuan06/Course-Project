@@ -1,5 +1,6 @@
 package com.trinity.courierapp.DTO;
 
+import com.trinity.courierapp.Entity.OrderTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,14 +14,16 @@ public class OrderInitResponseDto {
 
     private double price;
 
-    private String srcAddress;
-
-    private String destAddress;
-
-    private String polyline;
+    private String route;
 
     private double durationSecs;
 
     private double distanceMeters;
+
+    private OrderTypeEnum orderType;
+
+    public void setOrderType(OrderTypeEnum orderType) {
+        this.orderType = orderType;
+    }
 
 }
