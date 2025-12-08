@@ -18,8 +18,6 @@ public class RefreshTokenService {
 
     @Autowired
     private RefreshTokensRepository repository;
-    @Autowired
-    private UserRepository userRepository;
 
     public RefreshToken createRefreshToken(User user) {
 
