@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class OrderService {
@@ -37,7 +38,9 @@ public class OrderService {
         double boundary = 18;
         double km = commonUtils.findDistanceKm(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
 
-        if (srcGeocode.region() = "Bishkek" ||  "Osh City") {
+        if (Objects.equals(srcGeocode.region(), "Bishkek") || Objects.equals(srcGeocode.region(), "Osh City")) {
+
+
 
         }
 //        if (km < boundary) {
@@ -45,6 +48,7 @@ public class OrderService {
 //        }
 
 
+        // use common utils distance for finding distance from closest boarder point to the destination if it is outside the city or subregion
 
 
         return new CalcResult(price, currentOrderType);

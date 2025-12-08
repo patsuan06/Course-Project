@@ -22,8 +22,4 @@ public class OrderInitResponseDto {
 
     private OrderTypeEnum orderType;
 
-    public void setOrderType(OrderTypeEnum orderType) {
-        this.orderType = orderType;
-    }
-
 }
