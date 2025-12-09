@@ -17,8 +17,6 @@ public class OrderInitRequestDto {
 
     private String destAddress;
 
-    private OrderStatusEnum orderStatus;
-
     private VehicleTypeEnum vehicleType;
 
 }

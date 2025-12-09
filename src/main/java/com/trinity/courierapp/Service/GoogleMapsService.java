@@ -80,7 +80,7 @@ public class GoogleMapsService {
     }
 
 
-    private Map<String, Object> doGetDirections(double startLat, double startLng, double endLat, double endLng) {
+    public Map<String, Object> doGetDirections(double startLat, double startLng, double endLat, double endLng) {
         String url = String.format(
                 "https://maps.googleapis.com/maps/api/directions/json?origin=%f,%f&destination=%f,%f&key=%s",
                 startLat, startLng, endLat, endLng, apiKey
@@ -88,17 +88,17 @@ public class GoogleMapsService {
         return restTemplate.getForObject(url, Map.class);
     }
 
-    private String extractPolyline(Map<String, Object> directionsJson) {
+    public String extractPolyline(Map<String, Object> directionsJson) {
         Map<String, Object> firstRoute = ((List<Map<String, Object>>) directionsJson.get("routes")).get(0);
         return (String) ((Map<String, Object>) firstRoute.get("overview_polyline")).get("points");
     }
 
-    private double extractDistance(Map<String, Object> directionsJson) {
+    public double extractDistance(Map<String, Object> directionsJson) {
         Map<String, Object> firstLeg = ((List<Map<String, Object>>) ((List<Map<String, Object>>) directionsJson.get("routes")).get(0).get("legs")).get(0);
         return ((Number) ((Map<String, Object>) firstLeg.get("distance")).get("value")).doubleValue();
     }
 
-    private double extractDuration(Map<String, Object> directionsJson) {
+    public double extractDuration(Map<String, Object> directionsJson) {
         Map<String, Object> firstLeg = ((List<Map<String, Object>>) ((List<Map<String, Object>>) directionsJson.get("routes")).get(0).get("legs")).get(0);
         return ((Number) ((Map<String, Object>) firstLeg.get("duration")).get("value")).doubleValue();
     }
