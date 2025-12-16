@@ -1,10 +1,19 @@
 package com.trinity.courierapp.Util;
 
 import com.trinity.courierapp.DTO.CoordinateRecord;
+import com.trinity.courierapp.DTO.GeocodingResult;
+import com.trinity.courierapp.Service.GoogleMapsService;
+import org.locationtech.jts.geom.Point;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class CommonUtils {
+
+    @Autowired
+    private GoogleMapsService googleMapsService;
 
     public double findDistanceKm(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // Earth radius in km
@@ -43,6 +52,46 @@ public class CommonUtils {
         double distA = haversine(cityGps.lat(), cityGps.lng(), gpsA.lat(), gpsA.lng());
         double distB = haversine(cityGps.lat(), cityGps.lng(), gpsB.lat(), gpsB.lng());
         return distA <= radiusMeters && distB <= radiusMeters;
+    }
+
+    public double getDistanceAtoBMeters(String pointA, String pointB) {
+        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+        Map<String, Object> directions = googleMapsService.
+                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+        return googleMapsService.extractDistance(directions);
+    }
+
+    public double getDistanceAtoBMeters(Point srcCoordinates, String pointB) {
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+        Map<String, Object> directions = googleMapsService.
+                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destGeocode.lat(), destGeocode.lng());
+        return googleMapsService.extractDistance(directions);
+    }
+
+    public double getDurationAtoBMinutes(String pointA, String pointB) {
+        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+        Map<String, Object> directions = googleMapsService.
+                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+        double durationInSec = googleMapsService.extractDuration(directions);
+        double durationInMinutes = Math.round(durationInSec / 60);
+        return durationInMinutes;
+    }
+
+    public String getRouteAtoB(String pointA, String pointB) {
+        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+        Map<String, Object> directions = googleMapsService.
+                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+        return googleMapsService.extractPolyline(directions);
+    }
+
+    public String getRouteAtoB(CoordinateRecord srcCoordinates, String pointB) {
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+        Map<String, Object> directions = googleMapsService.
+                doGetDirections(srcCoordinates.lat(), srcCoordinates.lng(), destGeocode.lat(), destGeocode.lng());
+        return googleMapsService.extractPolyline(directions);
     }
 
 

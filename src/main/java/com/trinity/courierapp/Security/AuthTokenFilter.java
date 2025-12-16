@@ -33,6 +33,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
+
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
@@ -40,7 +41,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 final String username = jwtUtils.getUserFromToken(jwt);
                 final UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        null, userDetails, userDetails.getAuthorities()     ///////////beware
+                        userDetails, null, userDetails.getAuthorities()     ///////////beware
                 );
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);

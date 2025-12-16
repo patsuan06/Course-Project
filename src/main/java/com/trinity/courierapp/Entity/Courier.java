@@ -51,8 +51,7 @@ public class Courier {
 
     public Courier() {}
 
-    public Courier(Point courierGps, VehicleTypeEnum vehicleType, CourierStatusEnum courierStatus, String vehicleNumber) {
-        this.courierGps = courierGps;
+    public Courier( VehicleTypeEnum vehicleType, CourierStatusEnum courierStatus, String vehicleNumber) {
         this.vehicleType = vehicleType;
         this.courierStatus = courierStatus;
         this.vehicleNumber = vehicleNumber;

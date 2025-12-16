@@ -37,7 +37,7 @@ public class OrderService {
         GeocodingResult srcGeocode = googleMapsService.geocodeAddress(srcAddress);
         GeocodingResult destGeocode = googleMapsService.geocodeAddress(destAddress);
         OrderTypeEnum currentOrderType = OrderTypeEnum.INTER_REGION;
-        double km = commonUtils.findDistanceKm(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+//        double distanceKm = commonUtils.findDistanceKm(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
         CoordinateRecord destGps = new CoordinateRecord(destGeocode.lat(), destGeocode.lng());
         CoordinateRecord srcGps = new CoordinateRecord(srcGeocode.lat(), srcGeocode.lng());
         Map<String, Object> directions = googleMapsService.
@@ -81,38 +81,7 @@ public class OrderService {
         return new CalcResult(price, currentOrderType, priceKmRate);
     }
 
-    public double getDistanceAtoBMeters(String pointA, String pointB) {
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
-        Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
-        return googleMapsService.extractDistance(directions);
-    }
 
-    public double getDurationAtoBMinutes(String pointA, String pointB) {
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
-        Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
-        double durationInSec = googleMapsService.extractDuration(directions);
-        double durationInMinutes = Math.round(durationInSec / 60);
-        return durationInMinutes;
-    }
-
-    public String getRouteAtoB(String pointA, String pointB) {
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
-        Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
-        return googleMapsService.extractPolyline(directions);
-    }
-
-    public String getRouteAtoB(CoordinateRecord srcCoordinates, String pointB) {
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
-        Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcCoordinates.lat(), srcCoordinates.lng(), destGeocode.lat(), destGeocode.lng());
-        return googleMapsService.extractPolyline(directions);
-    }
 
 
 //    public String getEta(){

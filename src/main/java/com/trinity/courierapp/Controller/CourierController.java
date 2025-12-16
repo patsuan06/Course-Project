@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class CourierController {
 
     @Autowired
-    private final CourierRepository courierRepository;
+    private CourierRepository courierRepository;
 
-    public CourierController(CourierRepository courierRepository) {
-        this.courierRepository = courierRepository;
-    }
+
+
 
 }

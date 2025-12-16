@@ -6,6 +6,7 @@ import com.trinity.courierapp.Repository.RefreshTokensRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -18,19 +19,18 @@ public class RefreshTokenService {
     @Autowired
     private RefreshTokensRepository repository;
 
+    @Transactional
     public RefreshToken createRefreshToken(User user) {
 
         repository.deleteByUser(user);
 
-        RefreshToken token = new RefreshToken();
-        token.setUser(user);
-        token.setRefreshToken(UUID.randomUUID().toString());
-        token.setRefreshTokenExpiry(Instant.now().plusMillis(refreshExpirationMs));
+        RefreshToken token = new RefreshToken(user,UUID.randomUUID().toString(),Instant.now().plusMillis(refreshExpirationMs));
 
         repository.save(token);
         return token;
     }
 
+    @Transactional
     public RefreshToken verify(String token) {
         RefreshToken refreshToken = repository.findByRefreshToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid Refresh Token"));

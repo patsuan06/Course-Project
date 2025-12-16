@@ -1,9 +1,7 @@
 package com.trinity.courierapp.Service;
 
 import com.trinity.courierapp.DTO.GeocodingResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriUtils;
@@ -98,6 +96,50 @@ public class GoogleMapsService {
         return ((Number) ((Map<String, Object>) firstLeg.get("duration")).get("value")).doubleValue();
     }
 
+    public double getRouteDistance(double startLat, double startLng, double endLat, double endLng) {
+        Map<String, Object> directionsJson = doGetDirections(startLat, startLng, endLat, endLng);
+        Map<String, Object> firstLeg = ((List<Map<String, Object>>) ((List<Map<String, Object>>) directionsJson.get("routes")).get(0).get("legs")).get(0);
+        return ((Number) ((Map<String, Object>) firstLeg.get("distance")).get("value")).doubleValue();
+    }
+
+//    @SuppressWarnings("unchecked")
+//    private <T> T safeCast(Object obj, Class<T> clazz) {
+//        if (clazz.isInstance(obj)) {
+//            return clazz.cast(obj);
+//        }
+//        throw new ClassCastException("Cannot cast " + obj.getClass() + " to " + clazz);
+//    }
+
+//    public GeocodingResult geocodeAddress(String address) {
+//        Map<String, Object> json = doGeocode(address);
+//
+//        List<Map<String, Object>> results = safeCast(json.get("results"), List.class);
+//        if (results == null || results.isEmpty()) {
+//            throw new RuntimeException("No geocode results");
+//        }
+//
+//        Map<String, Object> first = results.get(0);
+//
+//        // --- coordinates ---
+//        Map<String, Object> geometry = safeCast(first.get("geometry"), Map.class);
+//        Map<String, Object> location = safeCast(geometry.get("location"), Map.class);
+//        double lat = safeCast(location.get("lat"), Number.class).doubleValue();
+//        double lng = safeCast(location.get("lng"), Number.class).doubleValue();
+//
+//        // --- region (administrative_area_level_1) ---
+//        List<Map<String, Object>> components =
+//                safeCast(first.get("address_components"), List.class);
+//
+//        String region = null;
+//        for (Map<String, Object> c : components) {
+//            List<String> types = safeCast(c.get("types"), List.class);
+//            if (types.contains("administrative_area_level_1")) {
+//                region = safeCast(c.get("long_name"), String.class);
+//                break;
+//            }
+//        }
+//        return new GeocodingResult(lat, lng, region);
+//    }
 
 
 }

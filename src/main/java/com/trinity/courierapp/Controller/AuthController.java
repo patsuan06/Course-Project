@@ -52,7 +52,7 @@ public class AuthController {
     private RefreshTokenService refreshTokenService;
 
     @PostMapping("/login")
-    public AuthResponseDto authenticateUser(@Valid @RequestBody AuthRequestDto authRequestDto) { /// bindingResult for errors (if I return request entity)
+    public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody AuthRequestDto authRequestDto) { /// bindingResult for errors (if I return request entity)
         Authentication authentication = authenticationManager.authenticate(
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
                         authRequestDto.getEmail(),
@@ -66,7 +66,7 @@ public class AuthController {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
         String refreshedToken = refreshToken.getRefreshToken();
 
-        return new AuthResponseDto(accessToken, refreshedToken);
+        return ResponseEntity.ok(new AuthResponseDto(accessToken, refreshedToken));
     }
 
     @PostMapping("/client_signup")
@@ -85,9 +85,9 @@ public class AuthController {
         if (userRepository.existsByEmail(dto.getEmail())){
             return "Email Already Exists";
         }
-        final User newUser = new User(dto.getFullName(), dto.getPhoneNumber(), dto.getPassword(), dto.getEmail(), dto.getUserType());
+        final User newUser = new User(dto.getFullName(), dto.getPhoneNumber(), passwordEncoder.encode(dto.getPassword()), dto.getEmail(), dto.getUserType());
         userRepository.save(newUser);
-        final Courier courier = new Courier(dto.getCourierGps(),dto.getVehicleType(), dto.getCourierStatus(), dto.getVehicleNumber());
+        final Courier courier = new Courier(dto.getVehicleType(), dto.getCourierStatus(), dto.getVehicleNumber());
         courier.setCourierUser(newUser);
         courierRepository.save(courier);
         return "Registration Successful";
