@@ -107,9 +107,16 @@ public class OrderService {
         return googleMapsService.extractPolyline(directions);
     }
 
+    public String getRouteAtoB(CoordinateRecord srcCoordinates, String pointB) {
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+        Map<String, Object> directions = googleMapsService.
+                doGetDirections(srcCoordinates.lat(), srcCoordinates.lng(), destGeocode.lat(), destGeocode.lng());
+        return googleMapsService.extractPolyline(directions);
+    }
+
 
 //    public String getEta(){
-
+//
 //        for courier destination
 //        Map<String, Object> courierToADirections = googleMapsService.
 //                doGetDirections(courier ,  , srcGeocode.lat(), srcGeocode.lng());

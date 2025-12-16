@@ -33,7 +33,7 @@ public class PaymentsController {
     @PostMapping("/intent")
     public ResponseEntity<?> createIntent(@RequestParam Long amount, @RequestParam String paymentMethodId) {
         try {
-            PaymentIntentResponse response = paymentService.createIntentAndPayWithSavedMethod(amount, paymentMethodId);
+            String response = paymentService.createIntentAndPayWithSavedMethod(amount, paymentMethodId);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

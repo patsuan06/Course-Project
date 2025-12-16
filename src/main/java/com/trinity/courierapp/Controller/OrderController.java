@@ -5,10 +5,8 @@ import com.trinity.courierapp.DTO.FindCourierResponseDto;
 import com.trinity.courierapp.DTO.OrderInitRequestDto;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.Entity.Order;
-import com.trinity.courierapp.Entity.User;
 import com.trinity.courierapp.Repository.OrderRepository;
-import com.trinity.courierapp.Repository.UserRepository;
-import com.trinity.courierapp.Service.GoogleMapsService;
+import com.trinity.courierapp.Service.CourierService;
 import com.trinity.courierapp.Service.OrderService;
 import com.trinity.courierapp.Util.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +28,7 @@ public class OrderController {
     private final OrderRepository orderRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private CourierService courierService;
 
     @Autowired
     private OrderService orderService;
@@ -65,7 +63,6 @@ public class OrderController {
         orderResponse.setSrcAddress(orderRequest.getSrcAddress());
         orderResponse.setDestAddress(orderRequest.getDestAddress());
         orderResponse.setVehicleType(orderRequest.getVehicleType());
-        orderResponse.setPriceRate(calcResult.priceRate());
 
         String orderToken = UUID.randomUUID().toString();
         orderResponse.setOrderToken(orderToken);
@@ -83,8 +80,11 @@ public class OrderController {
     @GetMapping("/find_courier")
     public FindCourierResponseDto findCourier(@RequestBody FindCourierRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
         String orderToken = requestDto.getOrderToken();
-        redis.expire("order:" + orderToken, 600, TimeUnit.SECONDS);
-        redisCache.get(requestDto.getOrderToken(), )
+        redis.expire("order:" + orderToken, 900, TimeUnit.SECONDS);
+        OrderInitResponseDto responseDto = redisCache.get(requestDto.getOrderToken(), OrderInitResponseDto.class);
+
+        courierService.findNeareastCourier(responseDto);
+        return new FindCourierResponseDto();
     }
 
     //We could check if the pricing is 70 and make it 60 if the destination is in just 10 km away from the courier's current position

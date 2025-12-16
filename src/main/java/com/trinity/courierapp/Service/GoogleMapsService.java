@@ -1,6 +1,7 @@
 package com.trinity.courierapp.Service;
 
 import com.trinity.courierapp.DTO.GeocodingResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,6 @@ public class GoogleMapsService {
     private final RestTemplate restTemplate;
     public GoogleMapsService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-    }
-
-
-    @Bean
-    private RestTemplate restTemplate(){
-        return new RestTemplate();
     }
 
 

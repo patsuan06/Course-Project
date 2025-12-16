@@ -20,7 +20,7 @@ public class OrderInitResponseDto {
 
     private String route;
 
-    // this is also temporary eta, after the courier is chosen, more real eta can be calculated
+    // this is also temporary eta, after the courier is chosen, more real eta can be calculated 
     private double durationMinutes;
 
     private double distanceMeters;
@@ -37,7 +37,5 @@ public class OrderInitResponseDto {
     private String destAddress;
 
     private VehicleTypeEnum vehicleType;
-
-    private double priceRate;
 
 }

@@ -3,7 +3,6 @@ package com.trinity.courierapp.Service;
 import com.trinity.courierapp.Entity.RefreshToken;
 import com.trinity.courierapp.Entity.User;
 import com.trinity.courierapp.Repository.RefreshTokensRepository;
-import com.trinity.courierapp.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
