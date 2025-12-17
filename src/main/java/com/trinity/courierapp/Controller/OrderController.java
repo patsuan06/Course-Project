@@ -2,9 +2,11 @@ package com.trinity.courierapp.Controller;
 
 import com.trinity.courierapp.DTO.OrderInitRequestDto;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
+import com.trinity.courierapp.Entity.User;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Repository.OrderRepository;
-//import com.trinity.courierapp.Service.CourierService;
+import com.trinity.courierapp.Repository.UserRepository;
+import com.trinity.courierapp.Service.CourierService;
 import com.trinity.courierapp.Service.OrderService;
 import com.trinity.courierapp.Util.CommonUtils;
 import com.trinity.courierapp.Util.RedisCache;
@@ -26,8 +28,8 @@ public class OrderController {
     @Autowired
     private OrderRepository orderRepository;
 
-//    @Autowired
-//    private CourierService courierService;
+    @Autowired
+    private CourierService courierService;
 
     @Autowired
     private OrderService orderService;
@@ -44,11 +46,16 @@ public class OrderController {
     @Autowired
     private CourierRepository courierRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private final ExecutorService workerExecutor = Executors.newSingleThreadExecutor();
 
     @PostMapping("/cancelOrderInit")
     public ResponseEntity<?> cancelOrderInit(@RequestParam String orderToken) {
+
+
 
 
         return ResponseEntity.ok(orderRepository);
@@ -57,12 +64,13 @@ public class OrderController {
     @PostMapping("/initialize")
     public ResponseEntity<OrderInitResponseDto> initOrder(OrderInitRequestDto orderRequest) {
         OrderInitResponseDto orderResponse = new OrderInitResponseDto();
-        OrderService.CalcResult calcResult = orderService.calculatePrice(orderRequest.getSrcAddress(), orderRequest.getDestAddress());
+        OrderService.CalcResult calcResult = orderService.calculatePrice(orderRequest.getSrcAddress(),orderRequest.getDestAddress());
         orderResponse.setPrice(calcResult.price());
         orderResponse.setOrderType(calcResult.orderType());
-        orderResponse.setDistanceMeters(commonUtils.getDistanceAtoBMeters(orderRequest.getSrcAddress(), orderRequest.getDestAddress()));
-        orderResponse.setDurationMinutes(commonUtils.getDurationAtoBMinutes(orderRequest.getSrcAddress(), orderRequest.getDestAddress()));
-        orderResponse.setRoute(commonUtils.getRouteAtoB(orderRequest.getSrcAddress(), orderRequest.getDestAddress()));
+        orderResponse.setPriceKmRate(calcResult.priceRate());
+        orderResponse.setDistanceMeters(commonUtils.getDistanceAtoBMeters(orderRequest.getSrcAddress(),orderRequest.getDestAddress()));
+        orderResponse.setDurationMinutes(commonUtils.getDurationAtoBMinutes(orderRequest.getSrcAddress(),orderRequest.getDestAddress()));
+        orderResponse.setRoute(commonUtils.getRouteAtoB(orderRequest.getSrcAddress(),orderRequest.getDestAddress()));
 
         //existing info
         orderResponse.setRecipientFullName(orderRequest.getRecipientFullName());
@@ -80,86 +88,119 @@ public class OrderController {
         //after he opts tho, we reset the timer
         return ResponseEntity.ok(orderResponse);
     }
+
+
+    @PostMapping("/find_courier")
+public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails) {
+
+
+        return CompletableFuture.supplyAsync(() -> {
+            boolean found = false;
+            long startTime = System.currentTimeMillis();
+            int countdownSeconds = 600;
+            long countdownMillis = countdownSeconds * 1000;
+
+            redis.expire("OrderInitResponseDto:" + orderToken, 1260, TimeUnit.SECONDS);
+            OrderInitResponseDto responseDto = redisCache.get(orderToken, OrderInitResponseDto.class);
+
+            while (!found && (System.currentTimeMillis() - startTime) < countdownMillis) {
+                try {
+                    Future<CourierService.FindCourierResult> futureResult = workerExecutor.submit(() -> courierService.findNearestCourier(responseDto));
+                    //The search starts here
+                    CourierService.FindCourierResult findCourierResult = futureResult.get(500, TimeUnit.MILLISECONDS);
+                    if (findCourierResult.found()) {
+                        found = true;
+                        CourierService.FindCourierResult result = findCourierResult;
+                        break;
+
+                    }
+                    //will it actually keep searching after there is no one there?
+                }catch (TimeoutException e) {
+                    continue;
+                } catch (InterruptedException|ExecutionException e) {
+                    Thread.currentThread().interrupt();
+                    return ResponseEntity.status(500).body("Courier searching interrupted");
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+            //gotta think about how this works, does stop right away when it finds someone
+            workerExecutor.shutdownNow();
+            if (found) {
+                CourierService.FindCourierResult findCourierResult = courierService.findNearestCourier(responseDto);
+                responseDto.setPrice(courierService.findNearestCourier(responseDto).newPrice());
+                return ResponseEntity.ok(responseDto);
+            } else {
+                return ResponseEntity.status(408).body("Courier not found in time");
+            }
+        });
+    }
+
+
+
+
+
+
+    // if the user opts to pay extra
+    @PostMapping("/find_courier_far")
+    public CompletableFuture< ResponseEntity<?> > findCourierFar(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails) {
+        return CompletableFuture.supplyAsync(() -> {
+            boolean found = false;
+            long startTime = System.currentTimeMillis();
+            int countdownSeconds = 600;
+            long countdownMillis = countdownSeconds * 1000;
+
+            redis.expire("OrderInitResponseDto:" + orderToken, 1260, TimeUnit.SECONDS);
+            OrderInitResponseDto responseDto = redisCache.get(orderToken, OrderInitResponseDto.class);
+
+            while (!found && (System.currentTimeMillis() - startTime) < countdownMillis) {
+                try {
+                    Future<CourierService.FindCourierResult> futureResult = workerExecutor.submit(() -> courierService.findNearestCourierFurther(responseDto));
+                    //The search starts here
+                    CourierService.FindCourierResult findCourierResult = futureResult.get(500, TimeUnit.MILLISECONDS);
+                    if (findCourierResult.found()){
+                        found = true;
+                        CourierService.FindCourierResult result = findCourierResult;
+                        break;
+                    };
+                    //search ends
+                }catch (TimeoutException e) {
+                    continue;
+                } catch (InterruptedException|ExecutionException e) {
+                    Thread.currentThread().interrupt();
+                    return ResponseEntity.status(500).body("Courier searching interrupted");
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+            workerExecutor.shutdownNow();
+            if (found) {
+                return ResponseEntity.ok("Courier found");
+            } else {
+                return ResponseEntity.status(408).body("Courier not found in time");
+            }
+        });
+    }
+
+    @PostMapping("/confirm_order")
+    public ResponseEntity<?> confirmOrder(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails){
+        String email = userDetails.getUsername();
+        User user = userRepository.findByEmail(email);
+
+    }
+
+
+
+
 }
-
-//    @GetMapping("/find_courier")
-//public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails) {
-//
-//
-//        CompletableFuture<ResponseEntity<?>> future = CompletableFuture.supplyAsync(() -> {
-//            boolean found = false;
-//            long startTime = System.currentTimeMillis();
-//            int countdownSeconds = 600;
-//            long countdownMillis = countdownSeconds * 1000;
-//
-//            redis.expire("OrderInitResponseDto:" + orderToken, 1260, TimeUnit.SECONDS);
-//            OrderInitResponseDto responseDto = redisCache.get(orderToken, OrderInitResponseDto.class);
-//
-//            while (!found && (System.currentTimeMillis() - startTime) < countdownMillis) {
-//                //The search starts here
-//                CourierService.FindCourierResult findCourierResult =  courierService.findNearestCourier(responseDto);
-//                found = checkCondition(true);
-//                //search ends
-//                try {
-//                    Thread.sleep(100); // avoid busy waiting
-//                } catch (InterruptedException e) {
-//                    Thread.currentThread().interrupt();
-//                    return ResponseEntity.status(500).body("Courier searching interrupted");
-//                }
-//            }
-//
-//            if (found) {
-//                return ResponseEntity.ok( FindCourierResponseDto());
-//            } else {
-//                return ResponseEntity.status(408).body("0 couriers found");
-//            }
-//        }, workerExecutor);
-//
-//        return future;
-//        }
-
-    //We could check if the pricing is 70 and make it 60 if the destination is in just 10 km away from the courier's current position
-
-
-
-
-
-//    // if the user opts to pay extra
-//    @GetMapping("/find_courier_far")
-//    public CompletableFuture< ResponseEntity<?> > findCourierFar(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails) {
-//
-//        CompletableFuture<ResponseEntity<?>> future = CompletableFuture.supplyAsync(() -> {
-//            boolean found = false;
-//            long startTime = System.currentTimeMillis();
-//            int countdownSeconds = 600;
-//            long countdownMillis = countdownSeconds * 1000;
-//
-//            redis.expire("OrderInitResponseDto:" + orderToken, 1260, TimeUnit.SECONDS);
-//            OrderInitResponseDto responseDto = redisCache.get(orderToken, OrderInitResponseDto.class);
-//
-//            while (!found && (System.currentTimeMillis() - startTime) < countdownMillis) {
-//                CourierService.FindCourierResult findCourierResult = courierService.findNearestCourier(responseDto);
-//                // For example, check a condition:
-//                found = checkCondition(true);
-//                try {
-//                    Thread.sleep(100); // avoid busy waiting
-//                } catch (InterruptedException e) {
-//                    Thread.currentThread().interrupt();
-//                    return ResponseEntity.status(500).body("Courier searching interrupted");
-//                }
-//            }
-//
-//            if (found) {
-//                return ResponseEntity.ok(FindCourierResponseDto());
-//            } else {
-//                return ResponseEntity.status(408).body("0 couriers found");
-//            }
-//        }, workerExecutor);
-//
-//        return future;
-//    }
-//
-//}
 
 
 
@@ -172,3 +213,37 @@ public class OrderController {
 //    return new FindCourierResponseDto();
 //}
 
+
+
+//public CompletableFuture< ResponseEntity<?> > findCourierFar(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails) {
+//
+//    CompletableFuture<ResponseEntity<?>> future = CompletableFuture.supplyAsync(() -> {
+//        boolean found = false;
+//        long startTime = System.currentTimeMillis();
+//        int countdownSeconds = 600;
+//        long countdownMillis = countdownSeconds * 1000;
+//
+//        redis.expire("OrderInitResponseDto:" + orderToken, 1260, TimeUnit.SECONDS);
+//        OrderInitResponseDto responseDto = redisCache.get(orderToken, OrderInitResponseDto.class);
+//
+//        while (!found && (System.currentTimeMillis() - startTime) < countdownMillis) {
+//            CourierService.FindCourierResult findNearestCourierFurther = courierService.findNearestCourierFurther(responseDto);
+//
+//            found = findNearestCourierFurther.found();
+//            try {
+//                Thread.sleep(100); // avoid busy waiting
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//                return ResponseEntity.status(500).body("Courier searching interrupted");
+//            }
+//        }
+//
+//        if (found) {
+//            return ResponseEntity.ok( OrderInitResponseDto());
+//        } else {
+//            return ResponseEntity.status(408).body("0 couriers found");
+//        }
+//    }, workerExecutor);
+//
+//    return future;
+//}

@@ -79,6 +79,15 @@ public class CommonUtils {
         return durationInMinutes;
     }
 
+    public double getDurationAtoBMinutes(Point srcCoordinates, String pointB) {
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+        Map<String, Object> directions = googleMapsService.
+                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destGeocode.lat(), destGeocode.lng());
+        double durationInSec = googleMapsService.extractDuration(directions);
+        double durationInMinutes = Math.round(durationInSec / 60);
+        return durationInMinutes;
+    }
+
     public String getRouteAtoB(String pointA, String pointB) {
         GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
         GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
@@ -87,10 +96,10 @@ public class CommonUtils {
         return googleMapsService.extractPolyline(directions);
     }
 
-    public String getRouteAtoB(CoordinateRecord srcCoordinates, String pointB) {
+    public String getRouteAtoB(Point srcCoordinates, String pointB) {
         GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcCoordinates.lat(), srcCoordinates.lng(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destGeocode.lat(), destGeocode.lng());
         return googleMapsService.extractPolyline(directions);
     }
 
