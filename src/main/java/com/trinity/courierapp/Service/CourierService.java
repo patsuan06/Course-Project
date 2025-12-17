@@ -51,16 +51,17 @@ public class CourierService {
             }
         }
 
-        double finalPrice = dto.getPrice() + routeDist * dto.getPriceKmRate() * 0.5;;
+        double finalPrice = dto.getPrice() + routeDist * dto.getPriceKmRate() * 0.5;
         double durationMins = dto.getDurationMinutes();
         assert nearest != null;
         Point courierCoords = nearest.getCourierGps();
         String courierToARoute = commonUtils.getRouteAtoB(courierCoords,srcAddress);
         double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,srcAddress);
         double finalDuration = courierToAMins + durationMins;
+        int courierId = nearest.getId();
 
 
-        return new FindCourierResult(nearest, true, finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist);
+        return new FindCourierResult(nearest, true, finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
     }
 
 
@@ -98,11 +99,12 @@ public class CourierService {
         String courierToARoute = commonUtils.getRouteAtoB(courierCoords,srcAddress);
         double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,srcAddress);
         double finalDuration = courierToAMins + durationMins;
+        int courierId = nearest.getId();
 
-        return new FindCourierResult(nearest,true,finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist);
+        return new FindCourierResult(nearest,true,finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
     }
 
-    public record FindCourierResult(Courier courier, boolean found, double newDuration, double newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist) {}
+    public record FindCourierResult(Courier courier, boolean found, double newDuration, double newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist, int courierId) {}
 
 }
 

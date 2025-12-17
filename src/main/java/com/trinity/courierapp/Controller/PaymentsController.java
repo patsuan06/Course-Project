@@ -20,7 +20,6 @@ import java.util.List;
 @RequestMapping("/api/payments")
 public class PaymentsController {
 
-
     private final PaymentService paymentService;
     private final UserRepository userRepository;
 
@@ -39,6 +38,7 @@ public class PaymentsController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error creating payment"+e.getMessage());
         }
+
     }
 
     @PostMapping("/save_method") /// send me the paymentmethodId that you should generate in the frontend after getting the key

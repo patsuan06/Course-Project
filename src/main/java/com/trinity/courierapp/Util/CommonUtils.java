@@ -3,7 +3,10 @@ package com.trinity.courierapp.Util;
 import com.trinity.courierapp.DTO.CoordinateRecord;
 import com.trinity.courierapp.DTO.GeocodingResult;
 import com.trinity.courierapp.Service.GoogleMapsService;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -102,6 +105,13 @@ public class CommonUtils {
                 doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destGeocode.lat(), destGeocode.lng());
         return googleMapsService.extractPolyline(directions);
     }
+
+    public static final GeometryFactory GEOMETRY_FACTORY =
+            new GeometryFactory(new PrecisionModel(), 4326);
+    public static Point toPoint(double lat, double lng) {
+        return GEOMETRY_FACTORY.createPoint(new Coordinate(lng, lat));
+    }
+
 
 
 }

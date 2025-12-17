@@ -38,6 +38,8 @@ public interface CourierRepository extends JpaRepository<Courier, Integer> {
             @Param("vehicleType") VehicleTypeEnum vehicleType
     );
 
+    Courier findById(int id);
+
 
 //    @Query(
 //            value = "SELECT * FROM courier_profiles c " +

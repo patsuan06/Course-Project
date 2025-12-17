@@ -2,15 +2,23 @@ package com.trinity.courierapp.Service;
 
 import com.trinity.courierapp.DTO.CoordinateRecord;
 import com.trinity.courierapp.DTO.GeocodingResult;
-import com.trinity.courierapp.Entity.OrderTypeEnum;
+import com.trinity.courierapp.DTO.OrderInitResponseDto;
+import com.trinity.courierapp.Entity.*;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Repository.OrderRepository;
 import com.trinity.courierapp.Util.CommonUtils;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.trinity.courierapp.Util.CommonUtils.GEOMETRY_FACTORY;
+import static com.trinity.courierapp.Util.CommonUtils.toPoint;
 
 @Service
 public class OrderService {
@@ -27,7 +35,20 @@ public class OrderService {
     @Autowired
     private CommonUtils commonUtils;
 
-//    public Order createOrder(OrderInitRequestDto orderInitRequestDto) {}
+    public Order createOrder(OrderInitResponseDto dto, User user) {
+        String srcAddress = dto.getSrcAddress();
+        String destAddress = dto.getDestAddress();
+        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(srcAddress);
+        GeocodingResult destGeocode = googleMapsService.geocodeAddress(destAddress);
+        Point srcPoint = toPoint(srcGeocode.lat(), srcGeocode.lng());
+        Point destPoint = toPoint(destGeocode.lat(), destGeocode.lng());
+        Courier courier = courierRepository.findById(dto.getCourierId());
+        courier.setCourierStatus(CourierStatusEnum.BUSY);
+        dto.setCourierStatus(CourierStatusEnum.BUSY);
+        courierRepository.save(courier);
+
+        return new Order(srcPoint, destPoint, dto.getOrderType(), OrderStatusEnum.TO_BE_PICKED_UP,courier,user,dto.getPaymentMethod(),dto.getRecipientFullName(), BigDecimal.valueOf(dto.getPrice()),dto.getRecipientPhoneNumber(), LocalDate.now());
+    }
 
     public CalcResult calculatePrice(String srcAddress, String destAddress) {
 

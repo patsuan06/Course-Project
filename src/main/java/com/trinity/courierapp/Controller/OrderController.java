@@ -2,6 +2,9 @@ package com.trinity.courierapp.Controller;
 
 import com.trinity.courierapp.DTO.OrderInitRequestDto;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
+import com.trinity.courierapp.Entity.Order;
+import com.trinity.courierapp.Entity.OrderStatusEnum;
+import com.trinity.courierapp.Entity.PaymentMethodEnum;
 import com.trinity.courierapp.Entity.User;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Repository.OrderRepository;
@@ -131,6 +134,7 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
             //gotta think about how this works, does stop right away when it finds someone
             workerExecutor.shutdownNow();
             if (found) {
+
                 CourierService.FindCourierResult findCourierResult = courierService.findNearestCourier(responseDto);
                 responseDto.setPrice(courierService.findNearestCourier(responseDto).newPrice());
                 return ResponseEntity.ok(responseDto);
@@ -190,11 +194,16 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
         });
     }
 
-    @PostMapping("/confirm_order")
-    public ResponseEntity<?> confirmOrder(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails){
+    @PostMapping("/create_order_cash")
+    public ResponseEntity<?> createOrder(@RequestParam String orderToken, @AuthenticationPrincipal UserDetails userDetails){
         String email = userDetails.getUsername();
         User user = userRepository.findByEmail(email);
-
+        OrderInitResponseDto dto = redisCache.get(orderToken,OrderInitResponseDto.class);
+        dto.setPaymentMethod(PaymentMethodEnum.CASH);
+        dto.setOrderStatus(OrderStatusEnum.TO_BE_PICKED_UP);
+        Order order = orderService.createOrder(dto,user);
+        orderRepository.save(order);
+        return ResponseEntity.ok(dto);
     }
 
 

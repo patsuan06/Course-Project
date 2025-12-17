@@ -1,8 +1,6 @@
 package com.trinity.courierapp.DTO;
 
-import com.trinity.courierapp.Entity.Courier;
-import com.trinity.courierapp.Entity.OrderTypeEnum;
-import com.trinity.courierapp.Entity.VehicleTypeEnum;
+import com.trinity.courierapp.Entity.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +26,8 @@ public class OrderInitResponseDto {
 
     private OrderTypeEnum orderType;
 
+    private OrderStatusEnum orderStatus;
+
     //after finding courier
     private double finalDurationMins;
 
@@ -39,6 +39,8 @@ public class OrderInitResponseDto {
 
     private String courierPhoneNumber;
 
+    private CourierStatusEnum courierStatus;
+
     private String vehicleNumber;
 
     private String courierLat;
@@ -47,6 +49,10 @@ public class OrderInitResponseDto {
     private String courierToARoute;
 
     // the following you don't have to take in frontend, it is just for me to store in cache:
+    private PaymentMethodEnum paymentMethod;
+
+    private int courierId;
+
     private double priceKmRate;
 
     private String recipientFullName;
