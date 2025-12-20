@@ -23,57 +23,6 @@ public class GoogleMapsService {
         this.restTemplate = restTemplate;
     }
 
-
-    public GeocodingResult geocodeAddress(String address) {
-        Map<String, Object> json = doGeocode(address);
-
-        List<Map<String, Object>> results = (List<Map<String, Object>>) json.get("results");
-        if (results == null || results.isEmpty()) {
-            throw new RuntimeException("No geocode results");
-        }
-
-        Map<String, Object> first = results.get(0);
-
-        // --- coordinates ---
-        Map<String, Object> geometry = (Map<String, Object>) first.get("geometry");
-        Map<String, Object> location = (Map<String, Object>) geometry.get("location");
-        double lat = ((Number) location.get("lat")).doubleValue();
-        double lng = ((Number) location.get("lng")).doubleValue();
-
-        // --- region (administrative_area_level_1) ---
-        List<Map<String, Object>> components =
-                (List<Map<String, Object>>) first.get("address_components");
-
-        String region = null;
-        for (Map<String, Object> c : components) {
-            List<String> types = (List<String>) c.get("types");
-            if (types.contains("administrative_area_level_1")) {
-                region = (String) c.get("long_name");
-            }
-        }
-
-        return new GeocodingResult(lat, lng, region);
-    }
-
-
-    public Map<String,Object> doGeocode(String address) {
-        try {
-            String url = "https://maps.googleapis.com/maps/api/geocode/json" +
-                    "?address=" + UriUtils.encode(address, StandardCharsets.UTF_8) +
-                    "&components=country:KG" +
-                    "&bounds=42.6,74.3|43.0,74.9" +
-                    "&key=" + apiKey;
-            Map<String, Object> body = restTemplate.getForObject(url, Map.class);
-
-            if (body == null) throw new RuntimeException("No response from Google Geocoding API");
-
-            return body;
-        } catch (Exception e) {
-            throw new RuntimeException("Geocode failed: " + e.getMessage(), e);
-        }
-    }
-
-
     public Map<String, Object> doGetDirections(double startLat, double startLng, double endLat, double endLng) {
         String url = String.format(
                 "https://maps.googleapis.com/maps/api/directions/json?origin=%f,%f&destination=%f,%f&key=%s",
@@ -103,44 +52,21 @@ public class GoogleMapsService {
         return ((Number) ((Map<String, Object>) firstLeg.get("distance")).get("value")).doubleValue();
     }
 
-//    @SuppressWarnings("unchecked")
-//    private <T> T safeCast(Object obj, Class<T> clazz) {
-//        if (clazz.isInstance(obj)) {
-//            return clazz.cast(obj);
-//        }
-//        throw new ClassCastException("Cannot cast " + obj.getClass() + " to " + clazz);
-//    }
+    public String getRegionFromPlaceId(String placeId) {
+        String apiKey = "YOUR_API_KEY";
+        String url = "https://maps.googleapis.com/maps/api/place/details/json?place_id=" + placeId + "&fields=address_component&key=" + apiKey;
 
-//    public GeocodingResult geocodeAddress(String address) {
-//        Map<String, Object> json = doGeocode(address);
-//
-//        List<Map<String, Object>> results = safeCast(json.get("results"), List.class);
-//        if (results == null || results.isEmpty()) {
-//            throw new RuntimeException("No geocode results");
-//        }
-//
-//        Map<String, Object> first = results.get(0);
-//
-//        // --- coordinates ---
-//        Map<String, Object> geometry = safeCast(first.get("geometry"), Map.class);
-//        Map<String, Object> location = safeCast(geometry.get("location"), Map.class);
-//        double lat = safeCast(location.get("lat"), Number.class).doubleValue();
-//        double lng = safeCast(location.get("lng"), Number.class).doubleValue();
-//
-//        // --- region (administrative_area_level_1) ---
-//        List<Map<String, Object>> components =
-//                safeCast(first.get("address_components"), List.class);
-//
-//        String region = null;
-//        for (Map<String, Object> c : components) {
-//            List<String> types = safeCast(c.get("types"), List.class);
-//            if (types.contains("administrative_area_level_1")) {
-//                region = safeCast(c.get("long_name"), String.class);
-//                break;
-//            }
-//        }
-//        return new GeocodingResult(lat, lng, region);
-//    }
+        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+        List<Map<String, Object>> components = (List<Map<String, Object>>)
+                ((Map<String, Object>) response.get("result")).get("address_components");
 
+        for (Map<String, Object> comp : components) {
+            List<String> types = (List<String>) comp.get("types");
+            if (types.contains("administrative_area_level_1")) {
+                return (String) comp.get("long_name");  // region/state
+            }
+        }
+        return null;
+    }
 
 }

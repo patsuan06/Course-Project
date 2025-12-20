@@ -1,7 +1,6 @@
 package com.trinity.courierapp.Util;
 
 import com.trinity.courierapp.DTO.CoordinateRecord;
-import com.trinity.courierapp.DTO.GeocodingResult;
 import com.trinity.courierapp.Service.GoogleMapsService;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -63,52 +62,43 @@ public class CommonUtils {
         return distA <= radiusMeters && distB <= radiusMeters;
     }
 
-    public double getDistanceAtoBMeters(String pointA, String pointB) {
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+    public double getDistanceAtoBMeters(double srcLat, double srcLng, double destLat, double destLng) {
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcLat, srcLng, destLat, destLng);
         return googleMapsService.extractDistance(directions);
     }
 
-    public double getDistanceAtoBMeters(Point srcCoordinates, String pointB) {
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+    public double getDistanceAtoBMeters(Point srcCoordinates, double destLng, double destLat) {
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destLat, destLng);
         return googleMapsService.extractDistance(directions);
     }
 
-    public double getDurationAtoBMinutes(String pointA, String pointB) {
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+    public double getDurationAtoBMinutes(double srcLat, double srcLng, double destLat, double destLng) {
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcLat, srcLng, destLat, destLng);
         double durationInSec = googleMapsService.extractDuration(directions);
         double durationInMinutes = Math.round(durationInSec / 60);
         return durationInMinutes;
     }
 
-    public double getDurationAtoBMinutes(Point srcCoordinates, String pointB) {
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+    public double getDurationAtoBMinutes(Point srcCoordinates, double destLng, double destLat) {
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destLat, destLng);
         double durationInSec = googleMapsService.extractDuration(directions);
         double durationInMinutes = Math.round(durationInSec / 60);
         return durationInMinutes;
     }
 
-    public String getRouteAtoB(String pointA, String pointB) {
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(pointA);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+    public String getRouteAtoB(double srcLat, double srcLng, double destLat, double destLng) {
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcLat, srcLng, destLat, destLng);
         return googleMapsService.extractPolyline(directions);
     }
 
-    public String getRouteAtoB(Point srcCoordinates, String pointB) {
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(pointB);
+    public String getRouteAtoB(Point srcCoordinates, double destLng, double destLat) {
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcCoordinates.getY(), srcCoordinates.getX(), destLat, destLng);
         return googleMapsService.extractPolyline(directions);
     }
 

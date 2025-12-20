@@ -27,14 +27,13 @@ public class CourierService {
     public FindCourierResult findNearestCourierFurther(OrderInitResponseDto dto) {
         boolean found = false;
         String srcAddress = dto.getSrcAddress();
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(srcAddress);
         //radius in meters to cut of the search area
         double MAX_DISTANCE= 100_000;
 
         List<Courier> candidates =
                 courierRepository.findEligibleCouriers(
-                        srcGeocode.lat(),
-                        srcGeocode.lng(),
+                        dto.getSrcLat(),
+                        dto.getSrcLng(),
                         MAX_DISTANCE,
                         dto.getVehicleType()
                 );
@@ -43,7 +42,7 @@ public class CourierService {
         double routeDist = 0;
 
         for (Courier c : candidates) {
-            routeDist = commonUtils.getDistanceAtoBMeters(c.getCourierGps(), srcAddress);
+            routeDist = commonUtils.getDistanceAtoBMeters(c.getCourierGps(), dto.getSrcLng(), dto.getSrcLat());
 
             if (routeDist <= MAX_DISTANCE && routeDist < minRouteDistance) {
                 minRouteDistance = routeDist;
@@ -55,8 +54,8 @@ public class CourierService {
         double durationMins = dto.getDurationMinutes();
         assert nearest != null;
         Point courierCoords = nearest.getCourierGps();
-        String courierToARoute = commonUtils.getRouteAtoB(courierCoords,srcAddress);
-        double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,srcAddress);
+        String courierToARoute = commonUtils.getRouteAtoB(courierCoords,dto.getSrcLng(),dto.getSrcLat());
+        double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,dto.getSrcLng(),dto.getSrcLat());
         double finalDuration = courierToAMins + durationMins;
         int courierId = nearest.getId();
 
@@ -68,14 +67,13 @@ public class CourierService {
     //searching for courier in 10 km radius
     public FindCourierResult findNearestCourier(OrderInitResponseDto dto) {
         String srcAddress = dto.getSrcAddress();
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(srcAddress);
         //radius in meters to cut of the search area
         double MAX_DISTANCE= 10_000;
 
         List<Courier> candidates =
                 courierRepository.findEligibleCouriers(
-                        srcGeocode.lat(),
-                        srcGeocode.lng(),
+                        dto.getSrcLat(),
+                        dto.getSrcLng(),
                         MAX_DISTANCE,
                         dto.getVehicleType()
                 );
@@ -84,7 +82,7 @@ public class CourierService {
         double routeDist = 0;
 
         for (Courier c : candidates) {
-            routeDist = commonUtils.getDistanceAtoBMeters(c.getCourierGps(), srcAddress);
+            routeDist = commonUtils.getDistanceAtoBMeters(c.getCourierGps(), dto.getSrcLng(), dto.getSrcLat());
 
             if (routeDist <= MAX_DISTANCE && routeDist < minRouteDistance) {
                 minRouteDistance = routeDist;
@@ -96,8 +94,8 @@ public class CourierService {
         double durationMins = dto.getDurationMinutes();
         assert nearest != null;
         Point courierCoords = nearest.getCourierGps();
-        String courierToARoute = commonUtils.getRouteAtoB(courierCoords,srcAddress);
-        double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,srcAddress);
+        String courierToARoute = commonUtils.getRouteAtoB(courierCoords,dto.getSrcLng(),dto.getSrcLat());
+        double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,dto.getSrcLng(),dto.getSrcLat());
         double finalDuration = courierToAMins + durationMins;
         int courierId = nearest.getId();
 

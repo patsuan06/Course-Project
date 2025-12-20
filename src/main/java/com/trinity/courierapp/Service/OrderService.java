@@ -36,12 +36,8 @@ public class OrderService {
     private CommonUtils commonUtils;
 
     public Order createOrder(OrderInitResponseDto dto, User user) {
-        String srcAddress = dto.getSrcAddress();
-        String destAddress = dto.getDestAddress();
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(srcAddress);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(destAddress);
-        Point srcPoint = toPoint(srcGeocode.lat(), srcGeocode.lng());
-        Point destPoint = toPoint(destGeocode.lat(), destGeocode.lng());
+        Point srcPoint = toPoint(dto.getSrcLat(), dto.getSrcLng());
+        Point destPoint = toPoint(dto.getDestLat(), dto.getDestLng());
         Courier courier = courierRepository.findById(dto.getCourierId());
         courier.setCourierStatus(CourierStatusEnum.BUSY);
         dto.setCourierStatus(CourierStatusEnum.BUSY);
@@ -51,28 +47,29 @@ public class OrderService {
         return new Order(srcPoint, destPoint, dto.getOrderType(), OrderStatusEnum.TO_BE_PICKED_UP,courier,user,dto.getPaymentMethod(),dto.getRecipientFullName(), BigDecimal.valueOf(dto.getPrice()),dto.getRecipientPhoneNumber(), LocalDate.now());
     }
 
-    public CalcResult calculatePrice(String srcAddress, String destAddress) {
+    public CalcResult calculatePrice(String srcPlaceId, String destPlaceId, double srcLat, double srcLng, double destLat, double destLng) {
 
         CoordinateRecord bishkekGps = new CoordinateRecord(42.871374,74.582327);
         CoordinateRecord oshGps = new CoordinateRecord(40.526464,72.806236);
 
-        GeocodingResult srcGeocode = googleMapsService.geocodeAddress(srcAddress);
-        GeocodingResult destGeocode = googleMapsService.geocodeAddress(destAddress);
+        String srcRegion = googleMapsService.getRegionFromPlaceId(srcPlaceId);
+        String destRegion = googleMapsService.getRegionFromPlaceId(destPlaceId);
+
         OrderTypeEnum currentOrderType = OrderTypeEnum.INTER_REGION;
 //        double distanceKm = commonUtils.findDistanceKm(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
-        CoordinateRecord destGps = new CoordinateRecord(destGeocode.lat(), destGeocode.lng());
-        CoordinateRecord srcGps = new CoordinateRecord(srcGeocode.lat(), srcGeocode.lng());
+        CoordinateRecord destGps = new CoordinateRecord(destLat, destLng);
+        CoordinateRecord srcGps = new CoordinateRecord(srcLat, srcLng);
         Map<String, Object> directions = googleMapsService.
-                doGetDirections(srcGeocode.lat(), srcGeocode.lng(), destGeocode.lat(), destGeocode.lng());
+                doGetDirections(srcLat, srcLng, destLat, destLng);
         double distanceAtoBMeters = googleMapsService.extractDistance(directions);
         double price = 0;
         int cityRadInMeters = 15000;
         int localOrderDistance = 15000;
         double priceKmRate = 0;
 
-        if ( (Objects.equals(srcGeocode.region(), "Bishkek") && Objects.equals(destGeocode.region(), "Bishkek"))
+        if ( (Objects.equals(srcRegion, "Bishkek") && Objects.equals(destRegion, "Bishkek"))
             ||
-                (Objects.equals(srcGeocode.region(), "Osh City") && Objects.equals(destGeocode.region(), "Osh City"))
+                (Objects.equals(srcRegion, "Osh City") && Objects.equals(destRegion, "Osh City"))
             ||
                 commonUtils.twoPointsInsideCity(bishkekGps,srcGps,destGps,cityRadInMeters)
             ||
@@ -82,7 +79,7 @@ public class OrderService {
             price = priceKmRate * distanceAtoBMeters;
             currentOrderType = OrderTypeEnum.LOCAL;
         }
-        else if (distanceAtoBMeters > localOrderDistance && (destGeocode.region().equals("Bishkek") || destGeocode.region().equals("Osh City"))) {
+        else if (distanceAtoBMeters > localOrderDistance && (destRegion.equals("Bishkek") || destRegion.equals("Osh City"))) {
             priceKmRate = 60;
             price = priceKmRate * distanceAtoBMeters;
         }
@@ -104,8 +101,6 @@ public class OrderService {
     }
 
 
-
-
 //    public String getEta(){
 //
 //        for courier destination
@@ -119,8 +114,6 @@ public class OrderService {
 
 ////        always add the from a to b and from courier to a
 //    }
-
-
 
 
     public record CalcResult(double price, OrderTypeEnum orderType, double priceRate) {}

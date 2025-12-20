@@ -59,11 +59,17 @@ public class OrderInitResponseDto {
 
     private String recipientPhoneNumber;
 
-    private String srcAddress;
-
-    private String destAddress;
-
     private VehicleTypeEnum vehicleType;
+
+    private double srcLat;
+    private double srcLng;
+    private String srcAddress;
+    private String srcPlaceId;
+
+    private double destLat;
+    private double destLng;
+    private String destAddress;
+    private String destPlaceId;
 
 
 

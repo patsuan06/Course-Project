@@ -13,9 +13,15 @@ public class OrderInitRequestDto {
 
     private String recipientPhoneNumber;
 
+    private double srcLat;
+    private double srcLng;
     private String srcAddress;
+    private String srcPlaceId;
 
+    private double destLat;
+    private double destLng;
     private String destAddress;
+    private String destPlaceId;
 
     private VehicleTypeEnum vehicleType;
 

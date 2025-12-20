@@ -13,6 +13,7 @@ import com.trinity.courierapp.Service.CourierService;
 import com.trinity.courierapp.Service.OrderService;
 import com.trinity.courierapp.Util.CommonUtils;
 import com.trinity.courierapp.Util.RedisCache;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
@@ -62,22 +63,28 @@ public class OrderController {
     }
 
     @PostMapping("/initialize")
-    public ResponseEntity<OrderInitResponseDto> initOrder(OrderInitRequestDto orderRequest) {
+    public ResponseEntity<OrderInitResponseDto> initOrder(@Valid @RequestBody OrderInitRequestDto orderRequest) {
         OrderInitResponseDto orderResponse = new OrderInitResponseDto();
-        OrderService.CalcResult calcResult = orderService.calculatePrice(orderRequest.getSrcAddress(),orderRequest.getDestAddress());
+        OrderService.CalcResult calcResult = orderService.calculatePrice(orderRequest.getSrcPlaceId(),orderRequest.getDestPlaceId(),orderRequest.getSrcLat(),orderRequest.getSrcLng(),orderRequest.getDestLat(),orderRequest.getDestLng());
         orderResponse.setPrice(calcResult.price());
         orderResponse.setOrderType(calcResult.orderType());
         orderResponse.setPriceKmRate(calcResult.priceRate());
-        orderResponse.setDistanceMeters(commonUtils.getDistanceAtoBMeters(orderRequest.getSrcAddress(),orderRequest.getDestAddress()));
-        orderResponse.setDurationMinutes(commonUtils.getDurationAtoBMinutes(orderRequest.getSrcAddress(),orderRequest.getDestAddress()));
-        orderResponse.setRoute(commonUtils.getRouteAtoB(orderRequest.getSrcAddress(),orderRequest.getDestAddress()));
+        orderResponse.setDistanceMeters(commonUtils.getDistanceAtoBMeters(orderRequest.getSrcLat(),orderRequest.getSrcLng(),orderRequest.getDestLat(),orderRequest.getDestLng()));
+        orderResponse.setDurationMinutes(commonUtils.getDurationAtoBMinutes(orderRequest.getSrcLat(),orderRequest.getSrcLng(),orderRequest.getDestLat(),orderRequest.getDestLng()));
+        orderResponse.setRoute(commonUtils.getRouteAtoB(orderRequest.getSrcLat(),orderRequest.getSrcLng(),orderRequest.getDestLat(),orderRequest.getDestLng()));
 
         //existing info
         orderResponse.setRecipientFullName(orderRequest.getRecipientFullName());
         orderResponse.setRecipientPhoneNumber(orderRequest.getRecipientPhoneNumber());
-        orderResponse.setSrcAddress(orderRequest.getSrcAddress());
-        orderResponse.setDestAddress(orderRequest.getDestAddress());
         orderResponse.setVehicleType(orderRequest.getVehicleType());
+        orderResponse.setSrcAddress(orderRequest.getSrcAddress());
+        orderResponse.setSrcLat(orderRequest.getSrcLat());
+        orderResponse.setSrcLng(orderRequest.getSrcLng());
+        orderResponse.setSrcPlaceId(orderRequest.getSrcPlaceId());
+        orderResponse.setDestAddress(orderRequest.getDestAddress());
+        orderResponse.setDestLat(orderRequest.getDestLat());
+        orderResponse.setDestLng(orderResponse.getDestLng());
+        orderResponse.setDestPlaceId(orderResponse.getDestPlaceId());
 
         String orderToken = UUID.randomUUID().toString();
         orderResponse.setOrderToken(orderToken);
