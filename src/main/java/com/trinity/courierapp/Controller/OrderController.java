@@ -83,8 +83,8 @@ public class OrderController {
         orderResponse.setSrcPlaceId(orderRequest.getSrcPlaceId());
         orderResponse.setDestAddress(orderRequest.getDestAddress());
         orderResponse.setDestLat(orderRequest.getDestLat());
-        orderResponse.setDestLng(orderResponse.getDestLng());
-        orderResponse.setDestPlaceId(orderResponse.getDestPlaceId());
+        orderResponse.setDestLng(orderRequest.getDestLng());
+        orderResponse.setDestPlaceId(orderRequest.getDestPlaceId());
 
         String orderToken = UUID.randomUUID().toString();
         orderResponse.setOrderToken(orderToken);
