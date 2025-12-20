@@ -1,11 +1,19 @@
 package com.trinity.courierapp.Controller;
 
 import com.stripe.exception.StripeException;
+import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.DTO.PaymentIntentResponse;
 import com.trinity.courierapp.DTO.SavedMethodsDto;
+import com.trinity.courierapp.Entity.Order;
+import com.trinity.courierapp.Entity.PaymentMethodEnum;
 import com.trinity.courierapp.Entity.User;
+import com.trinity.courierapp.Repository.OrderRepository;
 import com.trinity.courierapp.Repository.UserRepository;
+import com.trinity.courierapp.Service.OrderService;
 import com.trinity.courierapp.Service.PaymentService;
+import com.trinity.courierapp.Util.RedisCache;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,19 +30,39 @@ public class PaymentsController {
 
     private final PaymentService paymentService;
     private final UserRepository userRepository;
+    private final OrderService orderService;
+    private final RedisCache redisCache;
+    private final OrderRepository orderRepository;
+    private final RedisTemplate<String, Object> redis;
 
-    public PaymentsController(PaymentService paymentService, UserRepository userRepository) {
+//    @Autowired
+//    private RedisCache redisCache;
+//
+//    @Autowired
+//    private RedisTemplate<String, Object> redis;
+
+    public PaymentsController(PaymentService paymentService, UserRepository userRepository, OrderService orderService, RedisCache redisCache, OrderRepository orderRepository , RedisTemplate<String, Object> redis) {
         this.paymentService = paymentService;
         this.userRepository = userRepository;
+        this.orderService = orderService;
+        this.redisCache = redisCache;
+        this.orderRepository = orderRepository;
+        this.redis = redis;
     }
 
 
     @PostMapping("/intent")
-    public ResponseEntity<?> createIntent(@RequestParam Long amount, @RequestParam String paymentMethodId) {
+    public ResponseEntity<?> createIntent(@RequestParam Long amount, @RequestParam String paymentMethodId, @AuthenticationPrincipal UserDetails userDetails, @RequestParam String orderToken) {
         try {
             String response = paymentService.createIntentAndPayWithSavedMethod(amount, paymentMethodId);
+            String email = userDetails.getUsername();
+            User user = userRepository.findByEmail(email);
+            OrderInitResponseDto dto = redisCache.get(orderToken,OrderInitResponseDto.class);
+            dto.setPaymentMethod(PaymentMethodEnum.TRANSFER);
+            Order order = orderService.createOrder(dto,user);
+            orderRepository.save(order);
+            return ResponseEntity.ok(dto);
 
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error creating payment"+e.getMessage());
         }

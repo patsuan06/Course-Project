@@ -61,7 +61,7 @@ public class CourierService {
         int courierId = nearest.getId();
 
 
-        return new FindCourierResult(nearest, true, finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
+        return new FindCourierResult(true, finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
     }
 
 
@@ -101,26 +101,10 @@ public class CourierService {
         double finalDuration = courierToAMins + durationMins;
         int courierId = nearest.getId();
 
-        return new FindCourierResult(nearest,true,finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
+        return new FindCourierResult(true,finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
     }
 
-    public record FindCourierResult(Courier courier, boolean found, double newDuration, double newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist, int courierId) {}
+    public record FindCourierResult(boolean found, double newDuration, double newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist, int courierId) {}
 
 }
 
-//  You could take out the route loop coniditon out and use it as a module ot reduc eboilerplate code
-//    public Courier findNearestCourierByRoute(CoordinateRecord target, List<Courier> couriers) {
-//        Courier nearest = null;
-//        double minDistance = Double.MAX_VALUE;
-//
-//        for (Courier c : couriers) {
-//            // get route distance from courier to target in meters
-//            double dist = getRouteDistance(c.getLat(), c.getLng(), target.lat(), target.lng());
-//            if (dist < minDistance) {
-//                minDistance = dist;
-//                nearest = c;
-//            }
-//        }
-//
-//        return nearest;
-//    }

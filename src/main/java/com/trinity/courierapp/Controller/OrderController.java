@@ -47,9 +47,6 @@ public class OrderController {
     private CommonUtils commonUtils;
 
     @Autowired
-    private CourierRepository courierRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
@@ -112,8 +109,13 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
                     //The search starts here
                     CourierService.FindCourierResult findCourierResult = futureResult.get(500, TimeUnit.MILLISECONDS);
                     if (findCourierResult.found()) {
+                        responseDto.setFinalDurationMins(findCourierResult.newDuration());
+                        responseDto.setPrice(findCourierResult.newPrice());
+                        responseDto.setCourierToARoute(findCourierResult.courierToARoute());
+                        responseDto.setCourierToMins(findCourierResult.courierToAMinutes());
+                        responseDto.setCourierToARouteMeter(findCourierResult.routeCourierToADist());
+                        responseDto.setCourierId(findCourierResult.courierId());
                         found = true;
-                        CourierService.FindCourierResult result = findCourierResult;
                         break;
 
                     }
@@ -134,9 +136,6 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
             //gotta think about how this works, does stop right away when it finds someone
             workerExecutor.shutdownNow();
             if (found) {
-
-                CourierService.FindCourierResult findCourierResult = courierService.findNearestCourier(responseDto);
-                responseDto.setPrice(courierService.findNearestCourier(responseDto).newPrice());
                 return ResponseEntity.ok(responseDto);
             } else {
                 return ResponseEntity.status(408).body("Courier not found in time");
@@ -167,8 +166,13 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
                     //The search starts here
                     CourierService.FindCourierResult findCourierResult = futureResult.get(500, TimeUnit.MILLISECONDS);
                     if (findCourierResult.found()){
+                        responseDto.setFinalDurationMins(findCourierResult.newDuration());
+                        responseDto.setPrice(findCourierResult.newPrice());
+                        responseDto.setCourierToARoute(findCourierResult.courierToARoute());
+                        responseDto.setCourierToMins(findCourierResult.courierToAMinutes());
+                        responseDto.setCourierToARouteMeter(findCourierResult.routeCourierToADist());
+                        responseDto.setCourierId(findCourierResult.courierId());
                         found = true;
-                        CourierService.FindCourierResult result = findCourierResult;
                         break;
                     };
                     //search ends
@@ -200,14 +204,10 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
         User user = userRepository.findByEmail(email);
         OrderInitResponseDto dto = redisCache.get(orderToken,OrderInitResponseDto.class);
         dto.setPaymentMethod(PaymentMethodEnum.CASH);
-        dto.setOrderStatus(OrderStatusEnum.TO_BE_PICKED_UP);
         Order order = orderService.createOrder(dto,user);
         orderRepository.save(order);
         return ResponseEntity.ok(dto);
     }
-
-
-
 
 }
 

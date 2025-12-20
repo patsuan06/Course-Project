@@ -45,6 +45,7 @@ public class OrderService {
         Courier courier = courierRepository.findById(dto.getCourierId());
         courier.setCourierStatus(CourierStatusEnum.BUSY);
         dto.setCourierStatus(CourierStatusEnum.BUSY);
+        dto.setOrderStatus(OrderStatusEnum.TO_BE_PICKED_UP);
         courierRepository.save(courier);
 
         return new Order(srcPoint, destPoint, dto.getOrderType(), OrderStatusEnum.TO_BE_PICKED_UP,courier,user,dto.getPaymentMethod(),dto.getRecipientFullName(), BigDecimal.valueOf(dto.getPrice()),dto.getRecipientPhoneNumber(), LocalDate.now());
