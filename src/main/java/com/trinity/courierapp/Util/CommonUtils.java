@@ -11,12 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Random;
 
 @Component
 public class CommonUtils {
 
     @Autowired
     private GoogleMapsService googleMapsService;
+
+    private static final double MIN_LATITUDE = 42.75;
+    private static final double MAX_LATITUDE = 42.95;
+    private static final double MIN_LONGITUDE = 74.45;
+    private static final double MAX_LONGITUDE = 74.75;
 
     public double findDistanceKm(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // Earth radius in km
@@ -110,6 +116,30 @@ public class CommonUtils {
             new GeometryFactory(new PrecisionModel(), 4326);
     public static Point toPoint(double lat, double lng) {
         return GEOMETRY_FACTORY.createPoint(new Coordinate(lng, lat));
+    }
+
+
+
+    private static final Random random = new Random();
+
+    public double genRandLat() {
+        double latitude = MIN_LATITUDE + (MAX_LATITUDE - MIN_LATITUDE) * random.nextDouble();
+        double scale = Math.pow(10, 6);
+        double rounded = Math.round(latitude * scale) / scale;
+        return rounded;
+    }
+
+    public double genRandLng() {
+        double longitude = MIN_LONGITUDE + (MAX_LONGITUDE - MIN_LONGITUDE) * random.nextDouble();
+        double scale = Math.pow(10, 6);
+        double rounded = Math.round(longitude * scale) / scale;
+        return rounded;
+    }
+
+    public String genRandCoord() {
+        double latitude = MIN_LATITUDE + (MAX_LATITUDE - MIN_LATITUDE) * random.nextDouble();
+        double longitude = MIN_LONGITUDE + (MAX_LONGITUDE - MIN_LONGITUDE) * random.nextDouble();
+        return String.format("%.6f, %.6f", latitude, longitude);
     }
 
 

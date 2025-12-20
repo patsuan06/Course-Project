@@ -51,10 +51,11 @@ public class Courier {
 
     public Courier() {}
 
-    public Courier( VehicleTypeEnum vehicleType, CourierStatusEnum courierStatus, String vehicleNumber) {
+    public Courier( VehicleTypeEnum vehicleType, CourierStatusEnum courierStatus, String vehicleNumber, Point courierGps) {
         this.vehicleType = vehicleType;
         this.courierStatus = courierStatus;
         this.vehicleNumber = vehicleNumber;
+        this.courierGps = courierGps;
     }
 
     public double getLatitude() {

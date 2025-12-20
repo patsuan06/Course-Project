@@ -1,10 +1,7 @@
 package com.trinity.courierapp.Controller;
 
 
-import com.trinity.courierapp.DTO.AuthRequestDto;
-import com.trinity.courierapp.DTO.AuthResponseDto;
-import com.trinity.courierapp.DTO.ClientRegistrationRequestDto;
-import com.trinity.courierapp.DTO.CourierRegistrationRequestDto;
+import com.trinity.courierapp.DTO.*;
 import com.trinity.courierapp.Entity.Courier;
 import com.trinity.courierapp.Entity.RefreshToken;
 import com.trinity.courierapp.Entity.User;
@@ -13,6 +10,7 @@ import com.trinity.courierapp.Repository.UserRepository;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Security.JwtUtils;
 import com.trinity.courierapp.Service.RefreshTokenService;
+import com.trinity.courierapp.Util.CommonUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +48,8 @@ public class AuthController {
 
     @Autowired
     private RefreshTokenService refreshTokenService;
+    @Autowired
+    private CommonUtils commonUtils;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody AuthRequestDto authRequestDto) { /// bindingResult for errors (if I return request entity)
@@ -87,7 +87,7 @@ public class AuthController {
         }
         final User newUser = new User(dto.getFullName(), dto.getPhoneNumber(), passwordEncoder.encode(dto.getPassword()), dto.getEmail(), dto.getUserType());
         userRepository.save(newUser);
-        final Courier courier = new Courier(dto.getVehicleType(), dto.getCourierStatus(), dto.getVehicleNumber());
+        final Courier courier = new Courier(dto.getVehicleType(), dto.getCourierStatus(), dto.getVehicleNumber(), CommonUtils.toPoint(commonUtils.genRandLat(), commonUtils.genRandLng()));
         courier.setCourierUser(newUser);
         courierRepository.save(courier);
         return "Registration Successful";
@@ -104,8 +104,8 @@ public class AuthController {
 
     /// from front in json I need to receive in body: {"refreshToken": "abcd-1234-efgh-5678"}
     @PostMapping("/refresh")
-    public AuthResponseDto refresh(@Valid @RequestBody Map<String,String> body) {
-        String requestToken = body.get("refreshToken");
+    public AuthResponseDto refresh(@Valid @RequestBody RefreshJwtDto body) {
+        String requestToken = body.getRefreshToken();
 
         RefreshToken verified = refreshTokenService.verify(requestToken);
 

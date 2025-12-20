@@ -58,10 +58,11 @@ public class GoogleMapsService {
 
     public Map<String,Object> doGeocode(String address) {
         try {
-            String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" +
-                    UriUtils.encode(address, StandardCharsets.UTF_8) +
+            String url = "https://maps.googleapis.com/maps/api/geocode/json" +
+                    "?address=" + UriUtils.encode(address, StandardCharsets.UTF_8) +
+                    "&components=country:KG" +
+                    "&bounds=42.6,74.3|43.0,74.9" +
                     "&key=" + apiKey;
-
             Map<String, Object> body = restTemplate.getForObject(url, Map.class);
 
             if (body == null) throw new RuntimeException("No response from Google Geocoding API");

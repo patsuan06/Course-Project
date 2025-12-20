@@ -131,7 +131,6 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-
             }
             //gotta think about how this works, does stop right away when it finds someone
             workerExecutor.shutdownNow();
@@ -142,9 +141,6 @@ public CompletableFuture< ResponseEntity<?> > findCourier(@RequestParam String o
             }
         });
     }
-
-
-
 
 
 
