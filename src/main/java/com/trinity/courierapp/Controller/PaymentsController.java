@@ -61,7 +61,9 @@ public class PaymentsController {
             OrderInitResponseDto dto = redisCache.get(intentDto.getOrderToken(),OrderInitResponseDto.class);
             dto.setPaymentMethod(PaymentMethodEnum.TRANSFER);
             Order order = orderService.createOrder(dto,user);
+            dto.setIntentStatus(response);
             orderRepository.save(order);
+            redisCache.save(intentDto.getOrderToken(), dto, (long) dto.getFinalDurationMins()/1000 + 6000);
             return ResponseEntity.ok(dto);
 
         } catch (Exception e) {
