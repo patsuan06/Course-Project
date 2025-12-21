@@ -3,6 +3,7 @@ package com.trinity.courierapp.Service;
 import com.trinity.courierapp.DTO.GeocodingResult;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.Entity.Courier;
+import com.trinity.courierapp.Entity.VehicleTypeEnum;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Util.CommonUtils;
 import org.locationtech.jts.geom.Point;
@@ -32,7 +33,7 @@ public class CourierService {
                         dto.getSrcLat(),
                         dto.getSrcLng(),
                         MAX_DISTANCE,
-                        dto.getVehicleType()
+                        String.valueOf(dto.getVehicleType())
                 );
         Courier nearest = null;
         double minRouteDistance = MAX_DISTANCE;
@@ -71,7 +72,7 @@ public class CourierService {
                         dto.getSrcLat(),
                         dto.getSrcLng(),
                         MAX_DISTANCE,
-                        dto.getVehicleType()
+                        String.valueOf(dto.getVehicleType())
                 );
         Courier nearest = null;
         double minRouteDistance = MAX_DISTANCE;

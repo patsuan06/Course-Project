@@ -1,6 +1,7 @@
 package com.trinity.courierapp.Security;
 
 import com.trinity.courierapp.Service.CustomUserDetailsService;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +53,9 @@ public class WebSecurityConfig {
                 )
                 .authorizeHttpRequests(a ->
 //                        a.anyRequest().permitAll()
-                        a.requestMatchers("/api/auth/login", "/api/auth/client_signup", "/api/auth/courier_signup", "/api/auth/refresh").permitAll()
+                        a
+                                .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+                                .requestMatchers("/api/auth/login", "/api/auth/client_signup", "/api/auth/courier_signup", "/api/auth/refresh").permitAll()
                                 .anyRequest().authenticated()
                 );
 

@@ -22,7 +22,7 @@ public interface CourierRepository extends JpaRepository<Courier, Integer> {
         SELECT *
         FROM courier_profiles c
         WHERE c.courier_status = 'FREE'
-          AND c.vehicle_type = :vehicleType
+          AND c.vehicle_type = 'BIG'
           AND ST_DWithin(
                 c.courier_gps,
                 ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
@@ -35,7 +35,7 @@ public interface CourierRepository extends JpaRepository<Courier, Integer> {
             @Param("lat") double lat,
             @Param("lng") double lng,
             @Param("radius") double radiusMeters,
-            @Param("vehicleType") VehicleTypeEnum vehicleType
+            @Param("vehicleType") String vehicleType
     );
 
     Courier findById(int id);

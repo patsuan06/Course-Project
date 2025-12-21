@@ -73,11 +73,12 @@ public class Order {
 
     public Order() {}
 
-    public Order(Point srcGps, Point destGps, OrderTypeEnum orderType, OrderStatusEnum orderStatus, Courier courier, User user, PaymentMethodEnum paymentMethod,String recipientFullName, BigDecimal price, String recipientPhoneNumber, LocalDate orderDate) {
+    public Order(Point srcGps, Point destGps, OrderTypeEnum orderType, OrderStatusEnum orderStatus, VehicleTypeEnum vehicleType, Courier courier, User user, PaymentMethodEnum paymentMethod,String recipientFullName, BigDecimal price, String recipientPhoneNumber, LocalDate orderDate) {
         this.srcGps = srcGps;
         this.destGps = destGps;
         this.orderType = orderType;
         this.orderStatus = orderStatus;
+        this.vehicleType = vehicleType;
         this.courier = courier;
         this.user = user;
         this.paymentMethod = paymentMethod;

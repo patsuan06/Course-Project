@@ -36,6 +36,7 @@ public class OrderService {
     private CommonUtils commonUtils;
 
     public Order createOrder(OrderInitResponseDto dto, User user) {
+
         Point srcPoint = toPoint(dto.getSrcLat(), dto.getSrcLng());
         Point destPoint = toPoint(dto.getDestLat(), dto.getDestLng());
         Courier courier = courierRepository.findById(dto.getCourierId());
@@ -44,7 +45,7 @@ public class OrderService {
         dto.setOrderStatus(OrderStatusEnum.TO_BE_PICKED_UP);
         courierRepository.save(courier);
 
-        return new Order(srcPoint, destPoint, dto.getOrderType(), OrderStatusEnum.TO_BE_PICKED_UP,courier,user,dto.getPaymentMethod(),dto.getRecipientFullName(), BigDecimal.valueOf(dto.getPrice()),dto.getRecipientPhoneNumber(), LocalDate.now());
+        return new Order(srcPoint, destPoint, dto.getOrderType(), OrderStatusEnum.TO_BE_PICKED_UP, dto.getVehicleType() ,courier,user,dto.getPaymentMethod(),dto.getRecipientFullName(), BigDecimal.valueOf(dto.getPrice()),dto.getRecipientPhoneNumber(), LocalDate.now());
     }
 
     public CalcResult calculatePrice(String srcPlaceId, String destPlaceId, double srcLat, double srcLng, double destLat, double destLng) {
