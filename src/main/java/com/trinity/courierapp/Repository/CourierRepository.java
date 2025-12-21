@@ -17,27 +17,28 @@ public interface CourierRepository extends JpaRepository<Courier, Integer> {
 //    List<Courier> findByAvailableTrue(); error some
 
 
-    @Query(
-            value = """
-        SELECT *
-        FROM courier_profiles c
-        WHERE c.courier_status = 'FREE'
-          AND c.vehicle_type = 'BIG'
-          AND ST_DWithin(
-                c.courier_gps,
-                ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography,
-                :radius
-          )
-    """,
-            nativeQuery = true
-    )
+    @Query("""
+    SELECT c
+    FROM Courier c
+    WHERE c.courierStatus = 'FREE'
+      AND c.vehicleType = :vehicleType
+      AND function(
+            'ST_DWithin',
+            c.courierGps,
+            function(
+                'ST_SetSRID',
+                function('ST_MakePoint', :lng, :lat),
+                4326
+            ),
+            :radius
+      ) = true
+""")
     List<Courier> findEligibleCouriers(
             @Param("lat") double lat,
             @Param("lng") double lng,
             @Param("radius") double radiusMeters,
-            @Param("vehicleType") String vehicleType
+            @Param("vehicleType") VehicleTypeEnum vehicleType
     );
-
     Courier findById(int id);
 
 

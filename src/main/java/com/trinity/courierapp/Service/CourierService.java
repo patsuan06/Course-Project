@@ -33,7 +33,7 @@ public class CourierService {
                         dto.getSrcLat(),
                         dto.getSrcLng(),
                         MAX_DISTANCE,
-                        String.valueOf(dto.getVehicleType())
+                        dto.getVehicleType()
                 );
         Courier nearest = null;
         double minRouteDistance = MAX_DISTANCE;
@@ -48,7 +48,7 @@ public class CourierService {
             }
         }
 
-        double finalPrice = dto.getPrice() + routeDist * dto.getPriceKmRate() * 0.5;
+        double finalPrice = dto.getPrice() + routeDist/1000 * dto.getPriceKmRate() * 0.5;
         double durationMins = dto.getDurationMinutes();
         assert nearest != null;
         Point courierCoords = nearest.getCourierGps();
@@ -56,7 +56,6 @@ public class CourierService {
         double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,dto.getSrcLng(),dto.getSrcLat());
         double finalDuration = courierToAMins + durationMins;
         int courierId = nearest.getId();
-
 
         return new FindCourierResult(true, finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
     }
@@ -72,7 +71,7 @@ public class CourierService {
                         dto.getSrcLat(),
                         dto.getSrcLng(),
                         MAX_DISTANCE,
-                        String.valueOf(dto.getVehicleType())
+                        dto.getVehicleType()
                 );
         Courier nearest = null;
         double minRouteDistance = MAX_DISTANCE;
