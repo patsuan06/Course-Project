@@ -205,6 +205,7 @@ public class OrderController {
         dto.setPaymentMethod(PaymentMethodEnum.CASH);
         Order order = orderService.createOrder(dto,user);
         orderRepository.save(order);
+        redisCache.save( orderToken, dto, (long) dto.getFinalDurationMins()/1000 + 6000);
         return ResponseEntity.ok(dto);
     }
 

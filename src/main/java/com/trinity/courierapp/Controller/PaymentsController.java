@@ -1,6 +1,7 @@
 package com.trinity.courierapp.Controller;
 
 import com.stripe.exception.StripeException;
+import com.trinity.courierapp.DTO.CreateIntentDto;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.DTO.PaymentIntentResponse;
 import com.trinity.courierapp.DTO.SavedMethodsDto;
@@ -52,12 +53,12 @@ public class PaymentsController {
 
 
     @PostMapping("/intent")
-    public ResponseEntity<?> createIntent(@RequestParam Long amount, @RequestParam String paymentMethodId, @AuthenticationPrincipal UserDetails userDetails, @RequestParam String orderToken) {
+    public ResponseEntity<?> createIntent(@RequestBody CreateIntentDto intentDto, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            String response = paymentService.createIntentAndPayWithSavedMethod(amount, paymentMethodId);
             String email = userDetails.getUsername();
             User user = userRepository.findByEmail(email);
-            OrderInitResponseDto dto = redisCache.get(orderToken,OrderInitResponseDto.class);
+            String response = paymentService.createIntentAndPayWithSavedMethod(intentDto.getAmount(), intentDto.getPaymentMethodId());
+            OrderInitResponseDto dto = redisCache.get(intentDto.getOrderToken(),OrderInitResponseDto.class);
             dto.setPaymentMethod(PaymentMethodEnum.TRANSFER);
             Order order = orderService.createOrder(dto,user);
             orderRepository.save(order);

@@ -52,6 +52,9 @@ public class OrderInitResponseDto {
 
     private String courierToARoute;
 
+    //intent creation response status
+    private String intentStatus;
+
     // the following you don't have to take in frontend, it is just for me to store in cache:
     @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
