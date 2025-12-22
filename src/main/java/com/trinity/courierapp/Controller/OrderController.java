@@ -1,5 +1,6 @@
 package com.trinity.courierapp.Controller;
 
+import com.trinity.courierapp.DTO.GetOrderDto;
 import com.trinity.courierapp.DTO.OrderInitRequestDto;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.DTO.OrderTokenDto;
@@ -23,6 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -66,7 +68,7 @@ public class OrderController {
     public ResponseEntity<OrderInitResponseDto> initOrder(@Valid @RequestBody OrderInitRequestDto orderRequest) {
         OrderInitResponseDto orderResponse = new OrderInitResponseDto();
         OrderService.CalcResult calcResult = orderService.calculatePrice(orderRequest.getSrcPlaceId(),orderRequest.getDestPlaceId(),orderRequest.getSrcLat(),orderRequest.getSrcLng(),orderRequest.getDestLat(),orderRequest.getDestLng());
-        orderResponse.setPrice(calcResult.price());
+        orderResponse.setPrice((long)calcResult.price());
         orderResponse.setOrderType(calcResult.orderType());
         orderResponse.setPriceKmRate(calcResult.priceRate());
         orderResponse.setDistanceMeters(commonUtils.getDistanceAtoBMeters(orderRequest.getSrcLat(),orderRequest.getSrcLng(),orderRequest.getDestLat(),orderRequest.getDestLng()));
@@ -120,6 +122,8 @@ public class OrderController {
                         responseDto.setCourierToMins(findCourierResult.courierToAMinutes());
                         responseDto.setCourierToARouteMeter(findCourierResult.routeCourierToADist());
                         responseDto.setCourierId(findCourierResult.courierId());
+                        responseDto.setCourierLat(findCourierResult.courierCoords().getY());
+                        responseDto.setCourierLng(findCourierResult.courierCoords().getX());
                         redisCache.save( orderToken, responseDto, 660);
                         // Update your DTO with result data here...
                         try {
@@ -169,6 +173,8 @@ public class OrderController {
                         responseDto.setCourierToMins(findCourierResult.courierToAMinutes());
                         responseDto.setCourierToARouteMeter(findCourierResult.routeCourierToADist());
                         responseDto.setCourierId(findCourierResult.courierId());
+                        responseDto.setCourierLat(findCourierResult.courierCoords().getY());
+                        responseDto.setCourierLng(findCourierResult.courierCoords().getX());
                         redisCache.save( orderToken, responseDto, 660);
                         // Update your DTO with result data here...
                         try {
@@ -209,7 +215,19 @@ public class OrderController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/get_orders")
+    public ResponseEntity<?> getOrders(@AuthenticationPrincipal UserDetails userdetails){
+        String email = userdetails.getUsername();
+        User user = userRepository.findByEmail(email);
+        List<Order> orders =  orderRepository.findAllByUser(user);
+        return ResponseEntity.ok(new GetOrderDto(orders));
+
+    }
 }
+/*
+price, date order was created,the recepeint data,payment method if transfer, type of car,
+ */
+
 
 //    @PostMapping("/find_courier")
 //public CompletableFuture< ResponseEntity<?> > findCourier(@Valid @RequestBody OrderTokenDto orderTokenDto) {

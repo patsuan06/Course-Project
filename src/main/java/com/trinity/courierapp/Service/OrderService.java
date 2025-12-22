@@ -6,6 +6,8 @@ import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.Entity.*;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Repository.OrderRepository;
+import com.trinity.courierapp.Repository.PaymentDetailRepository;
+import com.trinity.courierapp.Repository.UserRepository;
 import com.trinity.courierapp.Util.CommonUtils;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -16,7 +18,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
-
+/*
+start adding extra charge for every minute after free wait time of 5 minutes
+ */
 import static com.trinity.courierapp.Util.CommonUtils.GEOMETRY_FACTORY;
 import static com.trinity.courierapp.Util.CommonUtils.toPoint;
 
@@ -24,7 +28,7 @@ import static com.trinity.courierapp.Util.CommonUtils.toPoint;
 public class OrderService {
 
     @Autowired
-    private OrderRepository orderRepository;
+    private PaymentDetailRepository paymentDetailRepository;
 
     @Autowired
     private CourierRepository courierRepository;
@@ -34,18 +38,27 @@ public class OrderService {
 
     @Autowired
     private CommonUtils commonUtils;
+    @Autowired
+    private UserRepository userRepository;
 
     public Order createOrder(OrderInitResponseDto dto, User user) {
-
+        PaymentDetail paymentDetail = null;
+        if (dto.getPaymentMethod() == PaymentMethodEnum.TRANSFER) {
+            paymentDetail = paymentDetailRepository.findById(dto.getPaymentDetailId());
+        }
         Point srcPoint = toPoint(dto.getSrcLat(), dto.getSrcLng());
         Point destPoint = toPoint(dto.getDestLat(), dto.getDestLng());
         Courier courier = courierRepository.findById(dto.getCourierId());
         courier.setCourierStatus(CourierStatusEnum.BUSY);
         dto.setCourierStatus(CourierStatusEnum.BUSY);
         dto.setOrderStatus(OrderStatusEnum.TO_BE_PICKED_UP);
+        User courierUser = courier.getCourierUser();
+        dto.setCourierName(courierUser.getFullName());
+        dto.setCourierPhoneNumber(courierUser.getPhoneNumber());
+        dto.setVehicleNumber(courier.getVehicleNumber());
         courierRepository.save(courier);
 
-        return new Order(srcPoint, destPoint, dto.getOrderType(), OrderStatusEnum.TO_BE_PICKED_UP, dto.getVehicleType() ,courier,user,dto.getPaymentMethod(),dto.getRecipientFullName(), BigDecimal.valueOf(dto.getPrice()),dto.getRecipientPhoneNumber(), LocalDate.now());
+        return new Order(srcPoint, destPoint, dto.getOrderType(), OrderStatusEnum.TO_BE_PICKED_UP, dto.getVehicleType() ,courier,user,dto.getPaymentMethod(),dto.getRecipientFullName(), BigDecimal.valueOf(dto.getPrice()),dto.getRecipientPhoneNumber(), LocalDate.now(),paymentDetail);
     }
 
     public CalcResult calculatePrice(String srcPlaceId, String destPlaceId, double srcLat, double srcLng, double destLat, double destLng) {

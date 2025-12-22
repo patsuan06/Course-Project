@@ -11,5 +11,8 @@ import java.util.Optional;
 public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, Long> {
     Optional<PaymentDetail> findByUser(User user);
     List<PaymentDetail> findAllByUser(User user);
+    PaymentDetail findById(int paymentDetailId);
+    PaymentDetail findByStripePaymentMethodId(String stripePaymentId);
+//    PaymentDetail findByUser(User user);
 
 }

@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -22,6 +24,9 @@ public class PaymentDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "paymentDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Order> orders = new LinkedHashSet<>();
 
     @Size(max = 255)
     @Column(name = "stripe_customer_id")

@@ -48,7 +48,7 @@ public class CourierService {
             }
         }
 
-        double finalPrice = dto.getPrice() + routeDist/1000 * dto.getPriceKmRate() * 0.5;
+        long finalPrice = (long) (dto.getPrice() + routeDist/1000 * dto.getPriceKmRate() * 0.5);
         double durationMins = dto.getDurationMinutes();
         assert nearest != null;
         Point courierCoords = nearest.getCourierGps();
@@ -57,7 +57,7 @@ public class CourierService {
         double finalDuration = courierToAMins + durationMins;
         int courierId = nearest.getId();
 
-        return new FindCourierResult(true, finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
+        return new FindCourierResult(true, finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId,courierCoords);
     }
 
     //searching for courier in 10 km radius
@@ -86,7 +86,7 @@ public class CourierService {
             }
         }
 
-        double finalPrice = dto.getPrice();
+        long finalPrice = dto.getPrice();
         double durationMins = dto.getDurationMinutes();
         assert nearest != null;
         Point courierCoords = nearest.getCourierGps();
@@ -95,10 +95,10 @@ public class CourierService {
         double finalDuration = courierToAMins + durationMins;
         int courierId = nearest.getId();
 
-        return new FindCourierResult(true,finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId);
+        return new FindCourierResult(true,finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId,courierCoords);
     }
 
-    public record FindCourierResult(boolean found, double newDuration, double newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist, int courierId) {}
+    public record FindCourierResult(boolean found, double newDuration, long newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist, int courierId, Point courierCoords) {}
 
 }
 

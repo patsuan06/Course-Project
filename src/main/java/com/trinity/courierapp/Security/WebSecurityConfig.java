@@ -51,11 +51,12 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> {})
-                .csrf(AbstractHttpConfigurer::disable)
+//                .cors(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
                 .exceptionHandling(e ->
                         e.authenticationEntryPoint(unauthorizedHandler)
-                 )
+                )
                 .sessionManagement(s ->
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -63,7 +64,8 @@ public class WebSecurityConfig {
 //                        a.anyRequest().permitAll()
                         a
                                 .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
-                                .requestMatchers(HttpMethod.OPTIONS ,"/api/auth/login", "/api/auth/client_signup", "/api/auth/courier_signup", "/api/auth/refresh").permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                                .requestMatchers("/api/auth/login", "/api/auth/client_signup", "/api/auth/courier_signup", "/api/auth/refresh").permitAll()
                                 .anyRequest().authenticated()
                 );
 

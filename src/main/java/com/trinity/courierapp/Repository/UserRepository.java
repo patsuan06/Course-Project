@@ -1,6 +1,7 @@
 package com.trinity.courierapp.Repository;
 
 
+import com.trinity.courierapp.Entity.Courier;
 import com.trinity.courierapp.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     User findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    User findByCourier(Courier courier);
 }

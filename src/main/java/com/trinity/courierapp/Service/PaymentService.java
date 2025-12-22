@@ -27,13 +27,14 @@ public class PaymentService {
         this.paymentDetailRepository = paymentDetailRepository;
     }
 
-    public String createIntentAndPayWithSavedMethod(Long amount, String paymentMethodId) throws StripeException {
+    public String createIntentAndPayWithSavedMethod(Long amount, String paymentMethodId, String customerId) throws StripeException {
         Long amountInCents = amount * 100;
         PaymentIntentCreateParams params =
                 PaymentIntentCreateParams.builder()
                         .setAmount(amountInCents)
                         .setCurrency("kgs")
                         .setPaymentMethod(paymentMethodId)
+                        .setCustomer(customerId)
                         .setConfirm(true)
                         .setOffSession(true)
                         .build();

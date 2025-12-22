@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Getter
 public class CreateIntentDto {
-    private Long amount;
     private String paymentMethodId;
-    private UserDetails userDetails;
     private String orderToken;
-
 }

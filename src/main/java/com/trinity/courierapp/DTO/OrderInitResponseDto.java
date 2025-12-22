@@ -19,7 +19,7 @@ public class OrderInitResponseDto {
     // this orderId is temporary, used for caching only, the permanent id will be set after final confirmation
     private String orderToken;
 
-    private double price;
+    private long price;
 
     private String route;
 
@@ -47,8 +47,8 @@ public class OrderInitResponseDto {
 
     private String vehicleNumber;
 
-    private String courierLat;
-    private String courierLng;
+    private double courierLat;
+    private double courierLng;
 
     private String courierToARoute;
 
@@ -56,8 +56,9 @@ public class OrderInitResponseDto {
     private String intentStatus;
 
     // the following you don't have to take in frontend, it is just for me to store in cache:
-    @Enumerated(EnumType.STRING)
     private PaymentMethodEnum paymentMethod;
+
+    private int paymentDetailId;
 
     private int courierId;
 

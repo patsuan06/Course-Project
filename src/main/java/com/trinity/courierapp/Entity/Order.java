@@ -68,12 +68,16 @@ public class Order {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private PaymentMethodEnum paymentMethod;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private PaymentDetail paymentDetail;
+
     @Column(name = "order_date", nullable = false)
     private LocalDate orderDate;
 
     public Order() {}
 
-    public Order(Point srcGps, Point destGps, OrderTypeEnum orderType, OrderStatusEnum orderStatus, VehicleTypeEnum vehicleType, Courier courier, User user, PaymentMethodEnum paymentMethod,String recipientFullName, BigDecimal price, String recipientPhoneNumber, LocalDate orderDate) {
+    public Order(Point srcGps, Point destGps, OrderTypeEnum orderType, OrderStatusEnum orderStatus, VehicleTypeEnum vehicleType, Courier courier, User user, PaymentMethodEnum paymentMethod,String recipientFullName, BigDecimal price, String recipientPhoneNumber, LocalDate orderDate, PaymentDetail paymentDetail) {
         this.srcGps = srcGps;
         this.destGps = destGps;
         this.orderType = orderType;
@@ -86,7 +90,9 @@ public class Order {
         this.recipientFullName = recipientFullName;
         this.recipientPhoneNumber = recipientPhoneNumber;
         this.orderDate = orderDate;
+        this.paymentDetail = paymentDetail;
     }
+
 
     public double getSrcLatitude() {
         return srcGps != null ? srcGps.getY() : 0.0;
