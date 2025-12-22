@@ -1,14 +1,11 @@
 package com.trinity.courierapp.DTO;
 
 import com.trinity.courierapp.Entity.*;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -58,7 +55,11 @@ public class OrderInitResponseDto {
     // the following you don't have to take in frontend, it is just for me to store in cache:
     private PaymentMethodEnum paymentMethod;
 
+    private LocalDate orderDate;
+
     private int paymentDetailId;
+
+    private String paymentMethodId;
 
     private int courierId;
 

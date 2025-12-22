@@ -6,12 +6,13 @@ import com.trinity.courierapp.Entity.Courier;
 import com.trinity.courierapp.Entity.VehicleTypeEnum;
 import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Util.CommonUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Slf4j
 @Service
 public class CourierService {
 
@@ -50,7 +51,10 @@ public class CourierService {
 
         long finalPrice = (long) (dto.getPrice() + routeDist/1000 * dto.getPriceKmRate() * 0.5);
         double durationMins = dto.getDurationMinutes();
-        assert nearest != null;
+        if (nearest == null) {
+            log.info("Courier not found yet, retrying...");
+            return FindCourierResult.notFound();
+        }
         Point courierCoords = nearest.getCourierGps();
         String courierToARoute = commonUtils.getRouteAtoB(courierCoords,dto.getSrcLng(),dto.getSrcLat());
         double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,dto.getSrcLng(),dto.getSrcLat());
@@ -88,7 +92,11 @@ public class CourierService {
 
         long finalPrice = dto.getPrice();
         double durationMins = dto.getDurationMinutes();
-        assert nearest != null;
+        if (nearest == null) {
+            log.info("Courier not found yet, retrying...");
+            return FindCourierResult.notFound();
+        }
+
         Point courierCoords = nearest.getCourierGps();
         String courierToARoute = commonUtils.getRouteAtoB(courierCoords,dto.getSrcLng(),dto.getSrcLat());
         double courierToAMins = commonUtils.getDurationAtoBMinutes(courierCoords,dto.getSrcLng(),dto.getSrcLat());
@@ -98,7 +106,11 @@ public class CourierService {
         return new FindCourierResult(true,finalDuration,finalPrice,courierToARoute,courierToAMins,routeDist,courierId,courierCoords);
     }
 
-    public record FindCourierResult(boolean found, double newDuration, long newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist, int courierId, Point courierCoords) {}
+    public record FindCourierResult(boolean found, double newDuration, long newPrice, String courierToARoute, double courierToAMinutes, double routeCourierToADist, int courierId, Point courierCoords) {
+        public static FindCourierResult notFound() {
+            return new FindCourierResult(false,0,0,"",0,0,0,null);
+        }
+    }
 
 }
 

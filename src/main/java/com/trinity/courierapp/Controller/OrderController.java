@@ -1,10 +1,10 @@
 package com.trinity.courierapp.Controller;
 
-import com.trinity.courierapp.DTO.GetOrderDto;
 import com.trinity.courierapp.DTO.OrderInitRequestDto;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.DTO.OrderTokenDto;
 import com.trinity.courierapp.Entity.*;
+import com.trinity.courierapp.Repository.CourierRepository;
 import com.trinity.courierapp.Repository.OrderRepository;
 import com.trinity.courierapp.Repository.PaymentDetailRepository;
 import com.trinity.courierapp.Repository.UserRepository;
@@ -21,10 +21,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -55,11 +53,13 @@ public class OrderController {
 
     @Autowired
     private PaymentDetailRepository paymentDetailRepository;
+    @Autowired
+    private CourierRepository courierRepository;
 
     @PostMapping("/cancelOrderInit")
     public ResponseEntity<?> cancelOrderInit(@RequestParam String orderToken) {
-
-        return ResponseEntity.ok(orderRepository);
+        redisCache.delete(orderToken);
+        return ResponseEntity.ok("Order initialization cancelled");
     }
 
     @PostMapping("/initialize")
@@ -213,23 +213,31 @@ public class OrderController {
     public ResponseEntity<?> getOrders(@AuthenticationPrincipal UserDetails userdetails){
         String email = userdetails.getUsername();
         User user = userRepository.findByEmail(email);
-        List<Order> orders =  orderRepository.findAllByUser(user);
-        List<GetOrderDto> dtos = orders.stream()
-                .map(order -> {
-                    PaymentDetail paymentDetail = paymentDetailRepository.findById(order.getPaymentDetail().getId());
-                    String paymentMethodId = (paymentDetail != null) ? paymentDetail.getStripePaymentMethodId() : null;
-                    return new GetOrderDto(order, paymentMethodId);
-                })
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
-
-
+        Order order =  orderRepository.findByUser(user);
+        Courier courier = order.getCourier();
+        PaymentDetail paymentDetail = order.getPaymentDetail();
+        OrderInitResponseDto dto = new OrderInitResponseDto();
+        dto.setPaymentMethodId(paymentDetail.getStripePaymentMethodId());
+        dto.setOrderStatus(order.getOrderStatus());
+        dto.setPrice(order.getPrice().longValue());
+        dto.setCourierName(userRepository.findByCourier(courier).getFullName());
+        dto.setCourierPhoneNumber(userRepository.findByCourier(courier).getPhoneNumber());
+        dto.setVehicleType(order.getVehicleType());
+        dto.setOrderDate(order.getOrderDate());
+        dto.setRecipientFullName(order.getRecipientFullName());
+        dto.setRecipientPhoneNumber(order.getRecipientPhoneNumber());
+        dto.setOrderType(order.getOrderType());
+        return ResponseEntity.ok(dto);
     }
 }
-/*
-price, date order was created,the recepeint data,payment method if transfer, type of car,
- */
 
+//List<GetOrderDto> dtos = orders.stream()
+//        .map(order -> {
+//            PaymentDetail paymentDetail = paymentDetailRepository.findById(order.getPaymentDetail().getId());
+//            String paymentMethodId = (paymentDetail != null) ? paymentDetail.getStripePaymentMethodId() : null;
+//            return new GetOrderDto(order, paymentMethodId);
+//        })
+//        .collect(Collectors.toList());
 
 //    @PostMapping("/find_courier")
 //public CompletableFuture< ResponseEntity<?> > findCourier(@Valid @RequestBody OrderTokenDto orderTokenDto) {
