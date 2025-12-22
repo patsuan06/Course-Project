@@ -21,8 +21,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -50,11 +52,6 @@ public class OrderController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private PaymentDetailRepository paymentDetailRepository;
-    @Autowired
-    private CourierRepository courierRepository;
 
     @PostMapping("/cancelOrderInit")
     public ResponseEntity<?> cancelOrderInit(@RequestParam String orderToken) {
@@ -210,34 +207,34 @@ public class OrderController {
     }
 
     @GetMapping("/get_orders")
-    public ResponseEntity<?> getOrders(@AuthenticationPrincipal UserDetails userdetails){
-        String email = userdetails.getUsername();
-        User user = userRepository.findByEmail(email);
-        Order order =  orderRepository.findByUser(user);
-        Courier courier = order.getCourier();
-        PaymentDetail paymentDetail = order.getPaymentDetail();
-        OrderInitResponseDto dto = new OrderInitResponseDto();
-        dto.setPaymentMethodId(paymentDetail.getStripePaymentMethodId());
-        dto.setOrderStatus(order.getOrderStatus());
-        dto.setPrice(order.getPrice().longValue());
-        dto.setCourierName(userRepository.findByCourier(courier).getFullName());
-        dto.setCourierPhoneNumber(userRepository.findByCourier(courier).getPhoneNumber());
-        dto.setVehicleType(order.getVehicleType());
-        dto.setOrderDate(order.getOrderDate());
-        dto.setRecipientFullName(order.getRecipientFullName());
-        dto.setRecipientPhoneNumber(order.getRecipientPhoneNumber());
-        dto.setOrderType(order.getOrderType());
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<?> getOrders(@AuthenticationPrincipal UserDetails userDetails){
+        User user = userRepository.findByEmail(userDetails.getUsername());
+        List<Order> orders = orderRepository.findAllByUser(user); // fetch all orders
+
+        List<OrderInitResponseDto> dtos = orders.stream().map(order -> {
+            Courier courier = order.getCourier();
+            PaymentDetail paymentDetail = order.getPaymentDetail();
+
+            OrderInitResponseDto dto = new OrderInitResponseDto();
+            dto.setPaymentMethodId(paymentDetail != null ? paymentDetail.getStripePaymentMethodId() : null);
+            dto.setOrderStatus(order.getOrderStatus());
+            dto.setPrice(order.getPrice().longValue());
+            dto.setCourierName(courier != null ? userRepository.findByCourier(courier).getFullName() : null);
+            dto.setCourierPhoneNumber(courier != null ? userRepository.findByCourier(courier).getPhoneNumber() : null);
+            dto.setVehicleType(order.getVehicleType());
+            dto.setOrderDate(order.getOrderDate());
+            dto.setRecipientFullName(order.getRecipientFullName());
+            dto.setRecipientPhoneNumber(order.getRecipientPhoneNumber());
+            dto.setOrderType(order.getOrderType());
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
+
 }
 
-//List<GetOrderDto> dtos = orders.stream()
-//        .map(order -> {
-//            PaymentDetail paymentDetail = paymentDetailRepository.findById(order.getPaymentDetail().getId());
-//            String paymentMethodId = (paymentDetail != null) ? paymentDetail.getStripePaymentMethodId() : null;
-//            return new GetOrderDto(order, paymentMethodId);
-//        })
-//        .collect(Collectors.toList());
 
 //    @PostMapping("/find_courier")
 //public CompletableFuture< ResponseEntity<?> > findCourier(@Valid @RequestBody OrderTokenDto orderTokenDto) {

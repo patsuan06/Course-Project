@@ -1,15 +1,12 @@
 package com.trinity.courierapp.Service;
 
 import com.trinity.courierapp.DTO.CoordinateRecord;
-import com.trinity.courierapp.DTO.GeocodingResult;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.Entity.*;
 import com.trinity.courierapp.Repository.CourierRepository;
-import com.trinity.courierapp.Repository.OrderRepository;
 import com.trinity.courierapp.Repository.PaymentDetailRepository;
 import com.trinity.courierapp.Repository.UserRepository;
 import com.trinity.courierapp.Util.CommonUtils;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
