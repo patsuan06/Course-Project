@@ -7,11 +7,11 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 public class GetOrderDto {
-    private List<Order> orders;
+    private Order orders;
+    private String paymentMethodId;
 
 }

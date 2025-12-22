@@ -4,12 +4,9 @@ import com.trinity.courierapp.DTO.GetOrderDto;
 import com.trinity.courierapp.DTO.OrderInitRequestDto;
 import com.trinity.courierapp.DTO.OrderInitResponseDto;
 import com.trinity.courierapp.DTO.OrderTokenDto;
-import com.trinity.courierapp.Entity.Order;
-import com.trinity.courierapp.Entity.OrderStatusEnum;
-import com.trinity.courierapp.Entity.PaymentMethodEnum;
-import com.trinity.courierapp.Entity.User;
-import com.trinity.courierapp.Repository.CourierRepository;
+import com.trinity.courierapp.Entity.*;
 import com.trinity.courierapp.Repository.OrderRepository;
+import com.trinity.courierapp.Repository.PaymentDetailRepository;
 import com.trinity.courierapp.Repository.UserRepository;
 import com.trinity.courierapp.Service.CourierService;
 import com.trinity.courierapp.Service.OrderService;
@@ -27,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -55,8 +53,8 @@ public class OrderController {
     @Autowired
     private UserRepository userRepository;
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
-    private final ExecutorService workerExecutor = Executors.newSingleThreadExecutor();
+    @Autowired
+    private PaymentDetailRepository paymentDetailRepository;
 
     @PostMapping("/cancelOrderInit")
     public ResponseEntity<?> cancelOrderInit(@RequestParam String orderToken) {
@@ -112,7 +110,6 @@ public class OrderController {
 
             while ((System.currentTimeMillis() - startTime) < countdownMillis) {
                 try {
-                    // Perform the search
                     CourierService.FindCourierResult findCourierResult = courierService.findNearestCourier(responseDto);
 
                     if (findCourierResult.found()) {
@@ -125,7 +122,6 @@ public class OrderController {
                         responseDto.setCourierLat(findCourierResult.courierCoords().getY());
                         responseDto.setCourierLng(findCourierResult.courierCoords().getX());
                         redisCache.save( orderToken, responseDto, 660);
-                        // Update your DTO with result data here...
                         try {
                             return ResponseEntity.ok(responseDto);
                         }catch (Exception e){
@@ -133,19 +129,17 @@ public class OrderController {
                         }
                     }
 
-                    // If not found, wait 2 seconds before checking again
+                    // If not found,wait 2 sec before checking again
                     Thread.sleep(2000);
 
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return ResponseEntity.status(500).body("Search interrupted");
                 } catch (Exception e) {
-                    // Log the actual error so you can see why the DB/Logic is failing
                     log.error("e: ", e);
                 }
             }
 
-            // NO workerExecutor.shutdownNow() here!
             return ResponseEntity.status(408).body("Courier not found in time");
         });
     }
@@ -220,7 +214,15 @@ public class OrderController {
         String email = userdetails.getUsername();
         User user = userRepository.findByEmail(email);
         List<Order> orders =  orderRepository.findAllByUser(user);
-        return ResponseEntity.ok(new GetOrderDto(orders));
+        List<GetOrderDto> dtos = orders.stream()
+                .map(order -> {
+                    PaymentDetail paymentDetail = paymentDetailRepository.findById(order.getPaymentDetail().getId());
+                    String paymentMethodId = (paymentDetail != null) ? paymentDetail.getStripePaymentMethodId() : null;
+                    return new GetOrderDto(order, paymentMethodId);
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+
 
     }
 }

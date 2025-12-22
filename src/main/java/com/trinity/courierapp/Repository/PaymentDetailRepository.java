@@ -12,6 +12,7 @@ public interface PaymentDetailRepository extends JpaRepository<PaymentDetail, Lo
     Optional<PaymentDetail> findByUser(User user);
     List<PaymentDetail> findAllByUser(User user);
     PaymentDetail findById(int paymentDetailId);
+
     PaymentDetail findByStripePaymentMethodId(String stripePaymentId);
 //    PaymentDetail findByUser(User user);
 
