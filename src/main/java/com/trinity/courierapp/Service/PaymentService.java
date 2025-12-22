@@ -26,7 +26,10 @@ public class PaymentService {
     public PaymentService(PaymentDetailRepository paymentDetailRepository) {
         this.paymentDetailRepository = paymentDetailRepository;
     }
-
+    /*
+    4000000000009995 (Insufficient funds).
+    4242424242424242 (Succeeds immediately).
+     */
     public String createIntentAndPayWithSavedMethod(Long amount, String paymentMethodId, String customerId) throws StripeException {
         Long amountInCents = amount * 100;
         PaymentIntentCreateParams params =
