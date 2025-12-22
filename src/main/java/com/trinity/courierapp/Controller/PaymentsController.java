@@ -90,11 +90,11 @@ public class PaymentsController {
     }
 
     @PostMapping("/save_method") /// send me the paymentmethodId that you should generate in the frontend after getting the key
-    public ResponseEntity<?> savePaymentMethod(@RequestParam String paymentMethodId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> savePaymentMethod(@RequestBody SaveMethodDto dto, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             String email = userDetails.getUsername();
             User user = userRepository.findByEmail(email);
-            paymentService.saveStripeCustomerAndMethod(user, paymentMethodId);
+            paymentService.saveStripeCustomerAndMethod(user, dto.paymentMethodId);
             return ResponseEntity.ok("Saved successfully, email is:"+ email);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error saving payment method");
@@ -108,6 +108,7 @@ public class PaymentsController {
         return paymentService.getSavedMethods(user);
     }
 
+    public record SaveMethodDto(String paymentMethodId){};
 
 }
 
